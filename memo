@@ -1,0 +1,8 @@
+2016/06/09
+git test
+2014/08/02 19:49
+PSE_input_pseudopotential_KY.f90
+擬ポテンシャルのinputにGa,Asを追加
+2014/08/02 19:55
+PSE_band_calculation.f90
+バンド計算のバグを修正。

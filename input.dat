@@ -1,0 +1,28 @@
+'GS'                                ! calc_mode 'RT', 'BD' or 'GS'
+'N'                                 ! entrance_option 'N' or 'R'
+1d10                                ! Time_shoutdown (sec)
+'diamond'                                ! SYSname
+'TBmBJ'  1.28d0                     ! 
+'PSE'  'FT'                         ! method 'PAW' or 'PSE' or 'CHK', type_spatial_difference = 'FD' or 'FT'
+0.0  1.0  1.0                       ! a_vec(:,1) : latice vector
+1.0  0.0  1.0                       ! a_vec(:,2) : latice vector
+1.0  1.0  0.0                       ! a_vec(:,3) : latice vector
+10.26  0.5  0.5  0.5              ! aL,aL1,aL2,aL3
+16 16 16                             ! NL1,NL2,NL3
+4  4  4                             ! NK1,NK2,NK3
+8  8                                ! NB,Nelec (# of bands, # of electrons)
+5  500                              ! Ncg ,Nscf (# of CG method,# of ground state iteration)
+2000  0.04  0                        ! Nt,dt,Npred_corr real-time parameter
+'Y'  600                             ! option_TD_band_dos, Nstep_TD_band_dos ('Y' or 'N')
+0.001                               ! dAc (initial distortion in response)
+'impulse'  'Tr'                          ! laser_type 'cos2cos', 'cos4cos' or 'impulse',  Tr_Lo 'Tr' or 'Lo'
+3.2d11  24.0  1.55  .0                ! IWcm2_1, tpulsefs_1(fs), omegaev_1(eV), phi_CEP_1(2pi) :laser
+1. 1. 1.                            ! Epdir_1 (Cartesian component of Ac)
+0d11  24.0  1.55  .0                ! IWcm2_2, tpulsefs_2(fs), omegaev_2(eV), phi_CEP_2(2pi) :laser
+0. 0. 1.                            ! Epdir_2 (Cartesian component of Ac)
+19.0                                ! T1_T2fs(fs)
+2  1                                ! NI,NE
+6                                  ! Zatom(j),j=1,NE
+1    .0       .0       .0      1    ! label, Rx, Ry, Rz, Kion
+2    .25      .25      .25     1    ! ion coordinate in unit of aL
+1                                   ! Lref(j),j=1,NE
