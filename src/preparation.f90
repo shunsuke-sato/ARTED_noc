@@ -15,6 +15,7 @@
 !
 subroutine preparation
   use global_variables
+  use PSE_variables
   implicit none
   integer :: i,j
   character(10) :: cEex_Cor_tmp
@@ -59,6 +60,7 @@ subroutine preparation
     read(*,*) Time_shoutdown
     read(*,*) SYSname
     read(*,*) cEex_Cor,cVal_mBJ
+    read(*,*) ps_format 
     read(*,*) method, type_spatial_difference
     read(*,*) a_Cvec_d(1,1),a_Cvec_d(2,1),a_Cvec_d(3,1)
     read(*,*) a_Cvec_d(1,2),a_Cvec_d(2,2),a_Cvec_d(3,2)
@@ -81,6 +83,7 @@ subroutine preparation
     write(*,'(A,2x,e16.6e3)') 'Time_shoutdown = ',Time_shoutdown
     write(*,'(A,2x,A)') 'SYSname = ',SYSname
     write(*,'(A,2x,A,2x,e16.6e3)') 'cEex_Cor, ,cVal_mBJ = ',cEex_Cor,cVal_mBJ
+    write(*,*) 'ps_format =',ps_format 
     write(*,'(A,2x,A,2x,A)') 'method, type_spatial_difference',method, type_spatial_difference
     write(*,'(A,2x,3e16.6E3)') 'a_Cvec_d(1,1),a_Cvec_d(2,1),a_Cvec_d(3,1) = ',a_Cvec_d(1,1),a_Cvec_d(2,1),a_Cvec_d(3,1)
     write(*,'(A,2x,3e16.6E3)') 'a_Cvec_d(1,2),a_Cvec_d(2,2),a_Cvec_d(3,2) = ',a_Cvec_d(1,2),a_Cvec_d(2,2),a_Cvec_d(3,2)
@@ -107,6 +110,7 @@ subroutine preparation
   call MPI_BCAST(SYSname,50,MPI_CHARACTER,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(cEex_Cor,10,MPI_CHARACTER,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(cVal_mBJ,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
+  call MPI_BCAST(ps_format,10,MPI_CHARACTER,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(method,3,MPI_CHARACTER,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(type_spatial_difference,2,MPI_CHARACTER,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(a_Cvec_d,3*3,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
@@ -183,7 +187,7 @@ subroutine preparation
     err_message='In preparation PAW method' ; call err_finalize
     call err_finalize
   case('PSE')
-    call PSE_input_pseudopotential_KY
+    call PSE_input_pseudopotential_YS
     call PSE_prep_ps_periodic
   case('CHK')
   case default
