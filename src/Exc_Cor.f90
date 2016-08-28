@@ -23,7 +23,7 @@ subroutine Exc_Cor
   case('PZ')
     call Exc_Cor_PZ
   case('TBmBJ')
-    call Exc_Cor_TBmBJ
+    call Exc_Cor_TBmBJ_GS
   case default
     err_message='Err. in Eex_Cor' ; call err_finalize
   end select
@@ -57,7 +57,7 @@ subroutine Exc_Cor_PZ
   return
 end subroutine Exc_Cor_PZ
 !=========================================================================================
-Subroutine Exc_Cor_TBmBJ(GS_RT)
+Subroutine Exc_Cor_TBmBJ_GS !(GS_RT)
   use Global_Variables
   implicit none
   real(8),parameter :: alpha=-0.012d0,beta=1.023d0,gamma=0.80d0
@@ -99,7 +99,7 @@ Subroutine Exc_Cor_TBmBJ(GS_RT)
   enddo
 
   return
-End Subroutine Exc_Cor_TBmBJ
+End Subroutine Exc_Cor_TBmBJ_GS
 !=========================================================================================
 Subroutine rho_j_tau(GS_RT,rho_s,tau_s,j_s,grho_s,lrho_s)
   use Global_Variables
