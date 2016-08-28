@@ -21,6 +21,7 @@ module PSE_variables
 ! pseudopotential
   integer,parameter :: Nrmax=3000,Lmax=4
   character(2) :: ps_type
+  character(10) :: ps_format 
   integer :: Nps,Nlma
   integer,allocatable :: Mps(:),Jxyz(:,:),Jxx(:,:),Jyy(:,:),Jzz(:,:)
   integer,allocatable :: Mlps(:),Lref(:),Zps(:),NRloc(:)
