@@ -103,6 +103,7 @@ End Subroutine Exc_Cor_TBmBJ_GS
 !=========================================================================================
 Subroutine rho_j_tau(GS_RT,rho_s,tau_s,j_s,grho_s,lrho_s)
   use Global_Variables
+  use PSE_variables
   implicit none
   character(2) :: GS_RT
   real(8) :: rho_s(NL),tau_s(NL),j_s(NL,3),grho_s(NL,3),lrho_s(NL)
@@ -113,7 +114,7 @@ Subroutine rho_j_tau(GS_RT,rho_s,tau_s,j_s,grho_s,lrho_s)
   real(8) :: fact
 
 !  allocate(tau_s_l_omp(NL,0:NUMBER_THREADS-1),j_s_l_omp(NL,3,0:NUMBER_THREADS-1)) ! sato
-  rho_s=rho_e*0.5d0
+  rho_s=rho_e*0.5d0 + rho_nlcc*0.5d0
 
   tau_s_l=0d0
   j_s_l=0d0
@@ -148,7 +149,7 @@ Subroutine rho_j_tau(GS_RT,rho_s,tau_s,j_s,grho_s,lrho_s)
   call MPI_ALLREDUCE(tau_s_l,tau_s,NL,MPI_REAL8,MPI_SUM,NEW_COMM_WORLD,ierr)
   call MPI_ALLREDUCE(j_s_l,j_s,NL*3,MPI_REAL8,MPI_SUM,NEW_COMM_WORLD,ierr)
 
-
+  tau_s = tau_s + 0.5d0*tau_nlcc
 
   tpsi = rho_s
   call PSE_grho_lrho_DFT(zgk0psi)

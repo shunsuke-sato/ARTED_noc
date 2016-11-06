@@ -25,6 +25,7 @@ Subroutine PSE_input_pseudopotential_YS
   real(8) :: r1,r2,r3,r4
   real(8) :: vpp(0:Nrmax0,0:Lmax0),upp(0:Nrmax0,0:Lmax0)   !zero in radial index for taking derivative
   real(8) :: dvpp(0:Nrmax0,0:Lmax0),dupp(0:Nrmax0,0:Lmax0) !zero in radial index for taking derivative
+  real(8) :: rhor_nlcc(0:Nrmax0,0:2)   !zero in radial index for taking derivative
   character(2) :: atom_symbol
   character(50) :: ps_file
   character(10) :: ps_postfix
@@ -36,9 +37,12 @@ Subroutine PSE_input_pseudopotential_YS
   allocate(Mps(NI),Lref(NE),Mlps(NE))
   allocate(anorm(0:Lmax,NE),inorm(0:Lmax,NE))
   allocate(rad(Nrmax,NE),vloctbl(Nrmax,NE))
+  allocate(rho_nlcc_tbl(Nrmax,NE),tau_nlcc_tbl(Nrmax,NE))
+  allocate(rho_nlcc(NL),tau_nlcc(NL))
   allocate(radnl(Nrmax,NE))
   allocate(udVtbl(Nrmax,0:Lmax,NE))
   allocate(Vpsl(NL))
+
 
   if(Myrank == 0)read(*,*) (Lref(j),j=1,NE)
   call MPI_BCAST(Lref,NE,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
@@ -152,7 +156,7 @@ Subroutine PSE_input_pseudopotential_YS
       select case (ps_format)
       case('KY')        ; call Read_PS_KY(Lmax0,Nrmax0,Mr,rRC,upp,vpp,ik,ps_file)
       case('ABINIT')    ; call Read_PS_ABINIT(Lmax0,Nrmax0,Mr,rRC,upp,vpp,ik,ps_file)
-      case('ABINITFHI') ; call Read_PS_ABINITFHI(Lmax0,Nrmax0,Mr,rRC,upp,vpp,ik,ps_file)
+      case('ABINITFHI') ; call Read_PS_ABINITFHI(Lmax0,Nrmax0,Mr,rRC,upp,vpp,rhor_nlcc,ik,ps_file)
       case('FHI')       ; call Read_PS_FHI(Lmax0,Nrmax0,Mr,rRC,upp,vpp,ik,ps_file)
 !      case('ATOM')      ; call Read_PS_ATOM
       case default ; stop 'Unprepared ps_format is required input_pseudopotential_YS'
@@ -210,6 +214,8 @@ Subroutine PSE_input_pseudopotential_YS
   CALL MPI_BCAST(rad,Nrmax*NE,MPI_REAL8,0,MPI_COMM_WORLD,ierr)
   CALL MPI_BCAST(radnl,Nrmax*NE,MPI_REAL8,0,MPI_COMM_WORLD,ierr)
   CALL MPI_BCAST(vloctbl,Nrmax*NE,MPI_REAL8,0,MPI_COMM_WORLD,ierr)
+  CALL MPI_BCAST(rho_nlcc_tbl,Nrmax*NE,MPI_REAL8,0,MPI_COMM_WORLD,ierr)
+  CALL MPI_BCAST(tau_nlcc_tbl,Nrmax*NE,MPI_REAL8,0,MPI_COMM_WORLD,ierr)
 !  CALL MPI_BCAST(dvloctbl,Nrmax*NE,MPI_REAL8,0,MPI_COMM_WORLD,ierr)
   CALL MPI_BCAST(udVtbl,Nrmax*(Lmax+1)*NE,MPI_REAL8,0,MPI_COMM_WORLD,ierr)
 !  CALL MPI_BCAST(dudVtbl,Nrmax*(Lmax+1)*NE,MPI_REAL8,0,MPI_COMM_WORLD,ierr)
@@ -261,6 +267,14 @@ Subroutine PSE_input_pseudopotential_YS
 !        dudVtbl(1:NRps(ik),l,ik)=dudVtbl(1:NRps(ik),l,ik)/anorm(l,ik)
       enddo
 
+      rho_nlcc_tbl(:,ik)=0d0; tau_nlcc_tbl(:,ik)=0d0
+      do i=1,NRps(ik)
+        if(rhor_nlcc(i-1,0)/rhor_nlcc(0,0) < 1d-7)exit
+        rho_nlcc_tbl(i,ik)=rhor_nlcc(i-1,0)
+        tau_nlcc_tbl(i,ik)=0.25d0*rhor_nlcc(i-1,1)**2/rhor_nlcc(i-1,0)
+      end do
+
+      
       return
     End Subroutine Making_PS_without_masking
   End Subroutine PSE_input_pseudopotential_YS
@@ -364,7 +378,7 @@ Subroutine Read_PS_ABINIT(Lmax0,Nrmax0,Mr,rRC,upp,vpp,ik,ps_file)
   return
 End Subroutine Read_PS_ABINIT
 !--------10--------20--------30--------40--------50--------60--------70--------80--------90--------100-------110-------120--------130
-Subroutine Read_PS_ABINITFHI(Lmax0,Nrmax0,Mr,rRC,upp,vpp,ik,ps_file)
+Subroutine Read_PS_ABINITFHI(Lmax0,Nrmax0,Mr,rRC,upp,vpp,rhor_nlcc,ik,ps_file)
   use Global_Variables
   use PSE_variables
 !This is for  FHI pseudopotential listed in abinit web page and not for original FHI98PP.
@@ -375,6 +389,7 @@ Subroutine Read_PS_ABINITFHI(Lmax0,Nrmax0,Mr,rRC,upp,vpp,ik,ps_file)
   integer,intent(out) :: Mr
   real(8),intent(out) :: rRC(0:Lmax0)
   real(8),intent(out) :: vpp(0:Nrmax0,0:Lmax0),upp(0:Nrmax0,0:Lmax0)
+  real(8),intent(out) :: rhor_nlcc(0:Nrmax0,0:2)
   character(50),intent(in) :: ps_file
 !local variable
   character(50) :: temptext
@@ -408,6 +423,14 @@ Subroutine Read_PS_ABINITFHI(Lmax0,Nrmax0,Mr,rRC,upp,vpp,ik,ps_file)
     upp(0,l)=0.d0
     vpp(0,l)=vpp(1,l)-(vpp(2,l)-vpp(1,l))/(rad(3,ik)-rad(2,ik))*(rad(2,ik))
   end do
+!Nonlinear core-correction
+  do i=1,Mr_l(0)
+    read(4,*) rad(i+1,ik),rhor_nlcc(i,0),rhor_nlcc(i,1),rhor_nlcc(i,2)
+  end do
+  rhor_nlcc(0,:)=rhor_nlcc(1,:)-(rhor_nlcc(2,:)-rhor_nlcc(1,:)) &
+    /(rad(3,ik)-rad(2,ik))*(rad(2,ik))
+  rhor_nlcc = rhor_nlcc/(4d0*pi)
+!Nonlinear core-correction
   close(4)
 
   if(minval(Mr_l(0:Mlps(ik))).ne.maxval(Mr_l(0:Mlps(ik)))) then
