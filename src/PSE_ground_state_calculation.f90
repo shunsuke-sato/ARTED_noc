@@ -20,6 +20,7 @@ subroutine PSE_ground_state_calculation
   real(8) :: rmix=0.2d0
   real(8) :: jav(3)
   real(8) :: Etot,Ekin
+  real(8),allocatable :: Vloc_old(:)
   character(10) :: cEex_Cor_tmp
 
   if(Myrank == 0)write(*,'(A)')'Ground state calculation start'
@@ -28,6 +29,7 @@ subroutine PSE_ground_state_calculation
   if(Myrank == 0)open(21,file='density_conv_GS.out')
 
   allocate(rho_MB_in(NL,MaxMem_MB),rho_MB_out(NL,MaxMem_MB)) ! For Broiden's method
+  allocate(Vloc_old(NL)); Vloc_old = Vloc
 
   do iter_scf=1,Nscf
     if(myrank == 0)write(*,*)kAc_Cvec(:,1)
@@ -45,10 +47,10 @@ subroutine PSE_ground_state_calculation
 !    rho_e=rho_e*rmix+rho_e_old*(1d0-rmix) ! linear mixing 
 !    rho_e_old=rho_e ! linear mixing
     rho_c=rho_e-rho_p
-    rho_MB_out(:,min(iter_scf,MaxMem_MB)) = rho_e(:) ! For Broiden's method
-    if(myrank == 0)write(21,'(I7,2x,999e26.16e3)')iter_scf, &
-      & sum((rho_MB_out(:,min(iter_scf,MaxMem_MB)) - rho_MB_in(:,min(iter_scf,MaxMem_MB)))**2)*H123
-    call modified_Broyden_mixing(iter_scf) ! For Broiden's method
+!    rho_MB_out(:,min(iter_scf,MaxMem_MB)) = rho_e(:) ! For Broiden's method
+!    if(myrank == 0)write(21,'(I7,2x,999e26.16e3)')iter_scf, &
+!      & sum((rho_MB_out(:,min(iter_scf,MaxMem_MB)) - rho_MB_in(:,min(iter_scf,MaxMem_MB)))**2)*H123
+!    call modified_Broyden_mixing(iter_scf) ! For Broiden's method
 
     call Hartree
     cEex_Cor_tmp = cEex_Cor
@@ -56,6 +58,8 @@ subroutine PSE_ground_state_calculation
     call Exc_Cor
     cEex_Cor = cEex_Cor_tmp
     call local_potential
+    Vloc = rmix*Vloc + (1d0-rmix)*Vloc_old
+    Vloc_old = Vloc
     call PSE_current_GS(jav)
 
     call PSE_energy(Etot,Ekin,'GS')
