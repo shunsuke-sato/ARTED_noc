@@ -32,6 +32,7 @@ Subroutine PSE_prep_ps_periodic
   real(8) :: dist_Lvec(3)  
   real(8) :: detA
   integer :: ilma,ia
+  real(8) :: rc
 
   detA=A_matrix(1,1)*A_matrix(2,2)*A_matrix(3,3)+A_matrix(2,1)*A_matrix(3,2)*A_matrix(1,3)+A_matrix(3,1)*A_matrix(1,2)*A_matrix(2,3) &
     -A_matrix(1,3)*A_matrix(2,2)*A_matrix(3,1)-A_matrix(2,3)*A_matrix(3,2)*A_matrix(1,1)-A_matrix(3,3)*A_matrix(1,2)*A_matrix(2,1)
@@ -280,6 +281,51 @@ Subroutine PSE_prep_ps_periodic
     enddo
   enddo
 
+! nonlinear core-correction
+  rho_nlcc = 0d0
+  tau_nlcc = 0d0
+  if(ps_format == "ABINITFHI")then
+    do a=1,NI
+      ik=Kion(a)
+      rc = 15d0 ! maximum
+      do i=1,Nrmax
+        if(rho_nlcc_tbl(i,ik) + tau_nlcc_tbl(i,ik) < 1d-6)then
+          rc = rad(i,ik)
+          exit
+        end if
+        if(i == Nrmax) stop"no-cut-off"
+      end do
+      
+      do ix=-2,2; do iy=-2,2; do iz=-2,2
+        do i=1,NL
+          dist_Lvec(1)=Lx(1,i)-(Rion_Lvec(1,a)+dble(ix))
+          dist_Lvec(2)=Lx(2,i)-(Rion_Lvec(2,a)+dble(iy))
+          dist_Lvec(3)=Lx(3,i)-(Rion_Lvec(3,a)+dble(iz))
+          
+          r2=0d0
+          do n=1,3
+            r2=r2+dist_Lvec(n)*sum(dist_Lvec(:)*mat_vv_a_Cvec(n,:))
+          end do
+          r=sqrt(r2)
+          if(r > rc)cycle
+          
+          do ir=1,NRmax
+            if(rad(ir,ik).gt.r) exit
+          enddo
+          intr=ir-1
+          if (intr.lt.0.or.intr.ge.NRmax)stop 'bad intr at prep_ps'
+          ratio1=(r-rad(intr,ik))/(rad(intr+1,ik)-rad(intr,ik))
+          ratio2=1-ratio1
+          rho_nlcc(i) = rho_nlcc(i) &
+            +ratio1*rho_nlcc_tbl(intr+1,ik)+ratio2*rho_nlcc_tbl(intr,ik)
+          tau_nlcc(i) = tau_nlcc(i) &
+            +ratio1*tau_nlcc_tbl(intr+1,ik)+ratio2*tau_nlcc_tbl(intr,ik)
+          
+        enddo
+        
+      end do; end do; end do
+    end do
+  end if
 
   if(myrank == 0)write(*,*)'PSE_prep_ps_periodic is complete'
   return

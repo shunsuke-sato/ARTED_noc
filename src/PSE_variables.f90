@@ -30,6 +30,8 @@ module PSE_variables
   real(8),allocatable :: radnl(:,:)
   real(8),allocatable :: Rloc(:),uV(:,:),duV(:,:,:),anorm(:,:)
   real(8),allocatable :: dvloctbl(:,:),dudVtbl(:,:,:)
+  real(8),allocatable :: rho_nlcc_tbl(:,:),tau_nlcc_tbl(:,:)
+  real(8),allocatable :: rho_nlcc(:),tau_nlcc(:)
   complex(8),allocatable :: ekr(:,:,:)
   real(8),allocatable :: Vpsl(:)
 
