@@ -24,15 +24,21 @@ program main
   implicit none
 
   call preparation
-  write(*,*)myrank,NK_s
-  call PSE_ground_state_calculation
 
   select case(calc_mode)
   case('RT')
+    call PSE_ground_state_calculation
     call PSE_real_time_propagation
   case('BD')
-      call PSE_band_calculation
+    call PSE_ground_state_calculation
+    call PSE_band_calculation
   case('GS')
+    call PSE_ground_state_calculation
+    if(myrank == 0)then
+      open(99,file="Vloc_gs.out",form='unformatted')
+      write(99)Vloc
+      close(99)
+    end if
   case default
     err_message='invalid calc_mode'
     call err_finalize
