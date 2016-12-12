@@ -26,19 +26,29 @@ program main
   call preparation
 
   select case(calc_mode)
-  case('RT')
+  case('RT') ! real-time propagation
     call PSE_ground_state_calculation
     call PSE_real_time_propagation
-  case('BD')
+  case('BD') ! band structure
     call PSE_ground_state_calculation
     call PSE_band_calculation
-  case('GS')
+  case('GS') ! ground state
     call PSE_ground_state_calculation
     if(myrank == 0)then
       open(99,file="Vloc_gs.out",form='unformatted')
       write(99)Vloc
       close(99)
     end if
+  case('MS') ! Matrix element preparation
+    if(myrank == 0)then
+      open(99,file="Vloc_gs.out",form='unformatted')
+      read(99)Vloc
+      close(99)
+    end if
+    call MPI_BCAST(Vloc,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
+    call PSE_preparation_basis_set
+
+  case('MT') ! prepare matrix elements
   case default
     err_message='invalid calc_mode'
     call err_finalize

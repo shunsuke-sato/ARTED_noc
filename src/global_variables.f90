@@ -138,6 +138,11 @@ module global_variables
   real(8),parameter :: alpha_MB = 0.35d0
   real(8),allocatable :: rho_MB_in(:,:),rho_MB_out(:,:)
 
+! Basis expansion method
+  integer :: NB_basis, NK_shift, NB_basis_main,NB_basis_shift
+  real(8),allocatable :: kshift(:,:)
+  complex(8),allocatable :: zu_basis(:,:,:)
+
 end Module Global_Variables
 
 
