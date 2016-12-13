@@ -47,6 +47,7 @@ program main
     end if
     call MPI_BCAST(Vloc,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
     call PSE_preparation_basis_set
+    call PSE_preparation_matrix
 
   case('MT') ! prepare matrix elements
   case default

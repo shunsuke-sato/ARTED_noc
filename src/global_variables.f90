@@ -142,6 +142,10 @@ module global_variables
   integer :: NB_basis, NK_shift, NB_basis_main,NB_basis_shift
   real(8),allocatable :: kshift(:,:)
   complex(8),allocatable :: zu_basis(:,:,:)
+  complex(8),allocatable :: zH_loc(:,:,:),zPi_loc(:,:,:)
+  complex(8),allocatable :: zV_NL(:,:,:,:),zPi_NL(:,:,:,:)
+  integer,parameter :: NAmax = 10
+  real(8) :: Amax,dAmax
 
 end Module Global_Variables
 
