@@ -176,6 +176,7 @@ subroutine PSE_preparation_matrix
     open(200,file="basis_exp_basic.out",form='unformatted')
     write(200)NB_basis
     write(200)Amax,dAmax
+    write(200)Epdir_1
     close(200)
   end if
 

@@ -49,7 +49,10 @@ program main
     call PSE_preparation_basis_set
     call PSE_preparation_matrix
 
-  case('MT') ! prepare matrix elements
+  case('MT') ! Time-propagation with basis expansion
+
+    call PSE_read_matrix_elements
+
   case default
     err_message='invalid calc_mode'
     call err_finalize
