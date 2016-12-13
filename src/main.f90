@@ -52,7 +52,7 @@ program main
   case('MT') ! Time-propagation with basis expansion
 
     call PSE_read_matrix_elements
-
+    call PSE_real_time_propagation_basis_expansion
   case default
     err_message='invalid calc_mode'
     call err_finalize

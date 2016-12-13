@@ -146,6 +146,7 @@ module global_variables
   complex(8),allocatable :: zV_NL(:,:,:,:),zPi_NL(:,:,:,:)
   integer,parameter :: NAmax = 10
   real(8) :: Amax,dAmax
+  real(8),allocatable :: Actot_BE(:)
 
 end Module Global_Variables
 
