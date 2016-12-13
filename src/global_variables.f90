@@ -148,6 +148,8 @@ module global_variables
   real(8) :: Amax,dAmax
   real(8),allocatable :: Actot_BE(:)
 
+  complex(8),allocatable :: zCt(:,:,:)
+
 end Module Global_Variables
 
 

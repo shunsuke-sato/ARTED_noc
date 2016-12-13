@@ -13,14 +13,28 @@
 !  See the License for the specific language governing permissions and
 !  limitations under the License.
 !
-subroutine PSE_real_time_propagation_basis_expansion
+subroutine init_wf_basis_expansion
   use global_variables
   implicit none
-  integer :: iter,iter_t
-  real(8) :: jav
+  complex(8),allocatable :: zMat_diag(:,:)
+  integer :: ik
+!LAPACK
+  integer :: lwork
+  complex(8),allocatable :: work_lp(:)
+  real(8),allocatable :: rwork(:),w(:)
+  integer :: info
 
-  call init_wf_basis_expansion
-  call init_Ac_basis_expansion
+  lwork=6*NB_basis
+  allocate(work_lp(lwork),rwork(3*NB_basis-2),w(NB_basis))
+  allocate(zMat_diag(NB_basis,NB_basis))
+
+  allocate(zCt(NB_basis,NB_TD,NK_s:NK_e))
+
+  do ik = NK_s,NK_e
+    zMat_diag(:,:)=zH_loc(:,:,ik)+zV_NL(:,:,ik,0)
+    call zheev('V', 'U', NB_basis, zMat_diag, NB_basis, w, work_lp, lwork, rwork, info)
+    zCt(1:NB_basis,1:NB_TD,ik)=zMat_diag(1:NB_basis,1:NB)
+  end do
 
   return
-end subroutine PSE_real_time_propagation_basis_expansion
+end subroutine init_wf_basis_expansion
