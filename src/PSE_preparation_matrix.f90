@@ -24,6 +24,8 @@ subroutine PSE_preparation_matrix
   complex(8) :: zjx1t,zjx2t,zjx3t,zjxt,zjyt,zjzt
   complex(8) :: uVpsi,uVpsix,uVpsiy,uVpsiz
   real(8) :: x1,x2,x3
+  character(50) :: cik, filename
+
 
   f0_1=5.338d-9*sqrt(IWcm2_1)      ! electric field in a.u.
   omega_1=omegaev_1/(2d0*Ry)  ! frequency in a.u.
@@ -169,6 +171,25 @@ subroutine PSE_preparation_matrix
       end do
     end do
   end do
+
+  if(myrank == 0)then
+    open(200,file="basis_exp_basic.out",form='unformatted')
+    write(200)NB_basis
+    write(200)Amax,dAmax
+    close(200)
+  end if
+
+  do ik = NK_s,NK_e
+    write(cik,"(I9.9)")ik
+    filename=trim(cik)//"_matrix_elements.out"
+    open(201,file=filename,form='unformatted')
+    write(201)zH_loc
+    write(201)zPi_loc
+    write(201)zV_NL
+    write(201)zPi_NL
+    close(201)
+  end do
+
 
   return
 end subroutine PSE_preparation_matrix
