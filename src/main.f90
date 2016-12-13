@@ -45,7 +45,7 @@ program main
       read(99)Vloc
       close(99)
     end if
-    call MPI_BCAST(Vloc,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
+    call MPI_BCAST(Vloc,NL,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
     call PSE_preparation_basis_set
     call PSE_preparation_matrix
 
