@@ -20,7 +20,7 @@ subroutine init_Ac_basis_expansion
   real(8) :: tt
   real(8) :: f0_1,f0_2,omega_1,omega_2,tpulse_1,tpulse_2,T1_T2
 
-  allocate(Actot_BE(0:Nt+2))
+  allocate(Actot_BE(0:Nt+2),javt_BE(0:Nt+1))
 
   f0_1=5.338d-9*sqrt(IWcm2_1)      ! electric field in a.u.
   omega_1=omegaev_1/(2d0*Ry)  ! frequency in a.u.
