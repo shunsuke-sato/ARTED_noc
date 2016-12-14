@@ -19,6 +19,8 @@ subroutine PSE_real_time_propagation_basis_expansion
   integer :: iter,iter_t
   real(8) :: jav,Act_t
 
+  if(myrank == 0)write(*,"(A)")"== Start real-time propagation with basis expansion."
+
   call init_wf_basis_expansion
   call init_Ac_basis_expansion
 
@@ -41,6 +43,8 @@ subroutine PSE_real_time_propagation_basis_expansion
 !== End current
 
   end do
+
+  if(myrank == 0)write(*,"(A)")"== End real-time propagation with basis expansion."
 
   return
 end subroutine PSE_real_time_propagation_basis_expansion

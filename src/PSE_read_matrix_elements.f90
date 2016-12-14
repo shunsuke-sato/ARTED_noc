@@ -19,7 +19,7 @@ subroutine PSE_read_matrix_elements
   integer :: ik
   character(50) :: cik, filename
 
-
+  if(myrank == 0)write(*,"(A)")"== Start reading matrix elements."
   if(myrank == 0)then
     open(200,file="basis_exp_basic.out",form='unformatted')
     read(200)NB_basis
@@ -56,6 +56,6 @@ subroutine PSE_read_matrix_elements
     close(201)
   end do
 
-
+  if(myrank == 0)write(*,"(A)")"== End reading matrix elements."
   return
 end subroutine PSE_read_matrix_elements

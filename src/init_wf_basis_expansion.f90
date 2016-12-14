@@ -24,6 +24,8 @@ subroutine init_wf_basis_expansion
   real(8),allocatable :: rwork(:),w(:)
   integer :: info
 
+  if(myrank == 0)write(*,"(A)")"== Initialization of wavefunctions."
+
   lwork=6*NB_basis
   allocate(work_lp(lwork),rwork(3*NB_basis-2),w(NB_basis))
   allocate(zMat_diag(NB_basis,NB_basis))
@@ -33,7 +35,7 @@ subroutine init_wf_basis_expansion
   do ik = NK_s,NK_e
     zMat_diag(:,:)=zH_loc(:,:,ik)+zV_NL(:,:,ik,0)
     call zheev('V', 'U', NB_basis, zMat_diag, NB_basis, w, work_lp, lwork, rwork, info)
-    zCt(1:NB_basis,1:NB_TD,ik)=zMat_diag(1:NB_basis,1:NB)
+    zCt(1:NB_basis,1:NB_TD,ik)=zMat_diag(1:NB_basis,1:NB_TD)
   end do
 
   return
