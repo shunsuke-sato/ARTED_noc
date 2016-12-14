@@ -20,7 +20,7 @@ subroutine init_Ac_basis_expansion
   real(8) :: tt
   real(8) :: f0_1,f0_2,omega_1,omega_2,tpulse_1,tpulse_2,T1_T2
 
-  if(myrank == 0)write(*,"(A)")"== Initialization of vector potential."
+  if(myrank == 0)write(*,"(A)")"== Start: Initialization of vector potential."
 
   allocate(Actot_BE(0:Nt+2),javt_BE(0:Nt+1))
 
@@ -31,11 +31,10 @@ subroutine init_Ac_basis_expansion
   omega_2=omegaev_2/(2d0*Ry)  ! frequency in a.u.
   tpulse_2=tpulsefs_2/0.02418d0 ! pulse duration in a.u.
   T1_T2=T1_T2fs/0.02418d0 ! pulse duration in a.u.
-  javt_Cvec=0.d0
+  javt_BE=0.d0
   Actot_BE = 0d0 
 
 ! 'cos2cos'                          ! laser_type 'cos2cos', 'cos4cos' or 'impulse'
-
   select case(laser_type)
   case('impulse')
     Actot_BE = dAc
@@ -77,6 +76,8 @@ subroutine init_Ac_basis_expansion
     err_message='error in init_Ac'
     call err_finalize
   end select
+
+  if(myrank == 0)write(*,"(A)")"== End: Initialization of vector potential."
 
   return
 end subroutine init_Ac_basis_expansion
