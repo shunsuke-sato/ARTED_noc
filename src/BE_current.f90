@@ -21,15 +21,7 @@ subroutine BE_current(jav,Act_t)
   real(8) :: jav_l
   integer :: iav, iav_t
   real(8) :: diff,xx
-
-  integer :: ik,ib,i,ix,iy,iz,ilma,ia,j
-  real(8) :: x1,x2,x3,jxt,jyt,jzt,jx1t,jx2t,jx3t,x,y,z
-  complex(8) :: uVpsi,uVpsix,uVpsiy,uVpsiz
-  real(8) :: curr(3),curr_l(3)
-  real(8) :: curr_Lvec(3),curr_l_Lvec(3)
-  complex(8) :: zt(3)
-  real(8) :: bb1,bb2,bb3
-  real(8) :: jx1,jx2,jx3
+  integer :: ik,ib
 
 !  kAc_Cvec(1,:)=kAc0_Cvec(1,:)+Act_t*Epdir_1(1)
 !  kAc_Cvec(2,:)=kAc0_Cvec(2,:)+Act_t*Epdir_1(2)
