@@ -28,7 +28,7 @@ subroutine init_wf_basis_expansion
   allocate(work_lp(lwork),rwork(3*NB_basis-2),w(NB_basis))
   allocate(zMat_diag(NB_basis,NB_basis))
 
-  allocate(zCt(NB_basis,NB_TD,NK_s:NK_e),zACt_tmp(NB_basis))
+  allocate(zCt(NB_basis,NB_TD,NK_s:NK_e),ztCt_tmp(NB_basis),zACt_tmp(NB_basis))
 
   do ik = NK_s,NK_e
     zMat_diag(:,:)=zH_loc(:,:,ik)+zV_NL(:,:,ik,0)

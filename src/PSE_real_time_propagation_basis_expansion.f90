@@ -31,10 +31,7 @@ subroutine PSE_real_time_propagation_basis_expansion
   do iter=0,Nt
 !== Start dt_evolve
     Act_t = 0.5d0*( Actot_BE(iter+1) + Actot_BE(iter) )
-    kAc_Cvec(1,:)=kAc0_Cvec(1,:)+Act_t*Epdir_1(1)
-    kAc_Cvec(2,:)=kAc0_Cvec(2,:)+Act_t*Epdir_1(2)
-    kAc_Cvec(3,:)=kAc0_Cvec(3,:)+Act_t*Epdir_1(3)
-!  call BE_dt_evolve
+    call BE_dt_evolve(Act_t)
 !== End dt_evolve
 
 !== Start current
