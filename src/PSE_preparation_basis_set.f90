@@ -30,8 +30,8 @@ subroutine PSE_preparation_basis_set
   if(myrank == 0)write(*,*)'charge =',sum(rho_c)*H123,sum(rho_e)*H123,sum(rho_p)*H123  
 
   NK_shift = 2
-  NB_basis_main = 14
-  NB_basis_shift = 14
+  NB_basis_main = 8
+  NB_basis_shift = 8
   NB_basis = NB_basis_main + NK_shift*NB_basis_shift
   allocate(kshift(3,NK_shift))
   kshift(1,1)=0.05d0/sqrt(2d0); kshift(2,1)=0.05d0/sqrt(2d0); kshift(3,1)=0d0
@@ -40,18 +40,15 @@ subroutine PSE_preparation_basis_set
   allocate(zu_basis(NL,NB_basis,NK_s:NK_e))
 
 
-  do iter_scf=1,Nscf
+  do iter_scf=1,100
     if(myrank == 0)write(*,*)kAc_Cvec(:,1)
     if(Myrank == 0)write(*,'(A,2X,I5)')'iter_scf = ',iter_scf
 
-    rho_MB_in(:,min(iter_scf,MaxMem_MB)) = rho_e(:) ! For Broiden's method
-    
     call Gram_Schmidt
     call PSE_Conjugate_Gradient(Ncg)
     call Gram_Schmidt
     call PSE_subspace_diag
     call Gram_Schmidt
-
 
     call PSE_current_GS(jav)
     call PSE_energy(Etot,Ekin,'GS')
