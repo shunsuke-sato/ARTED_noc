@@ -42,6 +42,18 @@ subroutine PSE_real_time_propagation_basis_expansion
   javt_BE(iter+1)=jav
 !== End current
 
+!== Start writing section
+  if(mod(iter,400) == 0 .or. iter == Nt)then
+    if(myrank == 0)then
+      open(102,file=trim(SYSname)//'_jac.out')
+      do iter_t=0,Nt+1
+        write(102,'(100e26.16e3)')Dt*dble(iter_t),Actot_BE(iter_t),javt_BE(iter_t)
+      end do
+      close(102)
+    end if
+  end if
+!== End writing section
+
   end do
 
   if(myrank == 0)write(*,"(A)")"== End real-time propagation with basis expansion."
