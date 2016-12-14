@@ -44,7 +44,7 @@ subroutine PSE_preparation_matrix
   do ik=NK_s,NK_e
     do ib2=1,NB_basis
       tpsi(:)=zu_basis(:,ib2,ik)
-      call PSE_hpsi(ik)
+      call PSE_hpsi_loc(ik)
       do ib1=ib2,NB_basis
         zs=sum(conjg(zu_basis(:,ib1,ik))*htpsi(:))*H123
         zH_loc(ib1,ib2,ik)=zs
