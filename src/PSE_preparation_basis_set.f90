@@ -40,7 +40,7 @@ subroutine PSE_preparation_basis_set
   allocate(zu_basis(NL,NB_basis,NK_s:NK_e))
 
 
-  do iter_scf=1,100
+  do iter_scf=1,Nscf
     if(myrank == 0)write(*,*)kAc_Cvec(:,1)
     if(Myrank == 0)write(*,'(A,2X,I5)')'iter_scf = ',iter_scf
 
