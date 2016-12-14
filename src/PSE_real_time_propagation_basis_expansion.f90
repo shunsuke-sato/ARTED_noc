@@ -24,10 +24,7 @@ subroutine PSE_real_time_propagation_basis_expansion
 
 !== Start current
   Act_t = Actot_BE(0)
-  kAc_Cvec(1,:)=kAc0_Cvec(1,:)+Act_t*Epdir_1(1)
-  kAc_Cvec(2,:)=kAc0_Cvec(2,:)+Act_t*Epdir_1(2)
-  kAc_Cvec(3,:)=kAc0_Cvec(3,:)+Act_t*Epdir_1(3)
-!  call BE_current(jav)
+  call BE_current(jav)
   javt_BE(0)=jav
 !== End current
 
@@ -42,10 +39,7 @@ subroutine PSE_real_time_propagation_basis_expansion
 
 !== Start current
   Act_t = Actot_BE(iter+1)
-  kAc_Cvec(1,:)=kAc0_Cvec(1,:)+Act_t*Epdir_1(1)
-  kAc_Cvec(2,:)=kAc0_Cvec(2,:)+Act_t*Epdir_1(2)
-  kAc_Cvec(3,:)=kAc0_Cvec(3,:)+Act_t*Epdir_1(3)
-!  call BE_current(jav)
+  call BE_current(jav)
   javt_BE(iter+1)=jav
 !== End current
 

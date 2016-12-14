@@ -144,11 +144,12 @@ module global_variables
   complex(8),allocatable :: zu_basis(:,:,:)
   complex(8),allocatable :: zH_loc(:,:,:),zPi_loc(:,:,:)
   complex(8),allocatable :: zV_NL(:,:,:,:),zPi_NL(:,:,:,:)
+  complex(8),allocatable :: zH_tot(:,:,:),zPi_tot(:,:,:)
   integer,parameter :: NAmax = 10
   real(8) :: Amax,dAmax
   real(8),allocatable :: Actot_BE(:),javt_BE(:)
 
-  complex(8),allocatable :: zCt(:,:,:)
+  complex(8),allocatable :: zCt(:,:,:),zACt_tmp(:)
 
 end Module Global_Variables
 
