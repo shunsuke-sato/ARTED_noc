@@ -90,6 +90,7 @@ module global_variables
   integer :: Ncg,Nscf
 
 ! RT parameter
+  character(1) :: option_IP='N'
   integer :: Nt
   real(8) :: dt
 
