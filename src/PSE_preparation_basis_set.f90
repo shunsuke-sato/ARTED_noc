@@ -99,7 +99,7 @@ subroutine PSE_preparation_basis_set
     end do
     NBs = NB_basis_main + NB_basis_shift*(ikshift-1) + 1
     NBe = NB_basis_main + NB_basis_shift*ikshift
-    zu_basis(:,NBs:NBe,NK_s:NK_e) = zu_GS(:,NBs:NBe,NK_s:NK_e)
+    zu_basis(:,NBs:NBe,NK_s:NK_e) = zu_GS(:,1:NB_basis_shift,NK_s:NK_e)
   end do
 
   do ik=NK_s,NK_e
