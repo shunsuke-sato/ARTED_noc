@@ -49,10 +49,10 @@ subroutine PSE_read_matrix_elements
     write(cik,"(I9.9)")ik
     filename=trim(cik)//"_matrix_elements.out"
     open(201,file=filename,form='unformatted')
-    read(201)zH_loc
-    read(201)zPi_loc
-    read(201)zV_NL
-    read(201)zPi_NL
+    read(201)zH_loc(:,:,ik)
+    read(201)zPi_loc(:,:,ik)
+    read(201)zV_NL(:,:,ik,:)
+    read(201)zPi_NL(:,:,ik,:)
     close(201)
   end do
 

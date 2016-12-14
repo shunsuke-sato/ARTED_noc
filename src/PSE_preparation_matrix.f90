@@ -184,10 +184,10 @@ subroutine PSE_preparation_matrix
     write(cik,"(I9.9)")ik
     filename=trim(cik)//"_matrix_elements.out"
     open(201,file=filename,form='unformatted')
-    write(201)zH_loc
-    write(201)zPi_loc
-    write(201)zV_NL
-    write(201)zPi_NL
+    write(201)zH_loc(:,:,ik)
+    write(201)zPi_loc(:,:,ik)
+    write(201)zV_NL(:,:,ik,:)
+    write(201)zPi_NL(:,:,ik,:)
     close(201)
   end do
 
