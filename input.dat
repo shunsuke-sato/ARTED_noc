@@ -15,6 +15,7 @@
 5  300                              ! Ncg ,Nscf (# of CG method,# of ground state iteration)
 2000  0.04  0                        ! Nt,dt,Npred_corr real-time parameter
 'N'  600                             ! option_TD_band_dos, Nstep_TD_band_dos ('Y' or 'N')
+'N'                                 ! option_IP ('Y' or 'N')
 0.001                               ! dAc (initial distortion in response)
 'cos4cos'  'Tr'                          ! laser_type 'cos2cos', 'cos4cos' or 'impulse',  Tr_Lo 'Tr' or 'Lo'
 1d13  10.0  1.55  .0                ! IWcm2_1, tpulsefs_1(fs), omegaev_1(eV), phi_CEP_1(2pi) :laser

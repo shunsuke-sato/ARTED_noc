@@ -38,7 +38,8 @@ subroutine PSE_real_time_propagation
   kAc_Cvec(1,:)=kAc0_Cvec(1,:)+Actot_Cvec(1,0)
   kAc_Cvec(2,:)=kAc0_Cvec(2,:)+Actot_Cvec(2,0)
   kAc_Cvec(3,:)=kAc0_Cvec(3,:)+Actot_Cvec(3,0)
-  call PSE_current_RT(jav)
+!  call PSE_current_RT(jav)
+  call PSE_current_RT_DFT(jav)
   javt_Cvec(:,0)=jav(:)
 !== End current
 
@@ -51,14 +52,25 @@ subroutine PSE_real_time_propagation
 
   do iter=0,Nt
 
-    call PSE_dt_evolve(iter)
+    select case(option_IP)
+    case('N')
+      call PSE_dt_evolve(iter)
+    case('Y')
+      call PSE_dt_evolve_IP(iter)
+    case default
+      err_message='invalid option_IP'
+      call err_finalize
+    end select
+
 
 !== Start current
     kAc_Cvec(1,:)=kAc0_Cvec(1,:)+Actot_Cvec(1,iter+1)
     kAc_Cvec(2,:)=kAc0_Cvec(2,:)+Actot_Cvec(2,iter+1)
     kAc_Cvec(3,:)=kAc0_Cvec(3,:)+Actot_Cvec(3,iter+1)
 
-    call PSE_current_RT(jav)
+!  call PSE_current_RT(jav)
+    call PSE_current_RT_DFT(jav)
+
     javt_Cvec(:,iter+1)=jav(:)
 !== End current
 

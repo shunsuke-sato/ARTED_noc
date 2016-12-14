@@ -90,6 +90,7 @@ module global_variables
   integer :: Ncg,Nscf
 
 ! RT parameter
+  character(1) :: option_IP='N'
   integer :: Nt
   real(8) :: dt
 
@@ -137,6 +138,19 @@ module global_variables
   integer,parameter :: MaxMem_MB = 8
   real(8),parameter :: alpha_MB = 0.35d0
   real(8),allocatable :: rho_MB_in(:,:),rho_MB_out(:,:)
+
+! Basis expansion method
+  integer :: NB_basis, NK_shift, NB_basis_main,NB_basis_shift
+  real(8),allocatable :: kshift(:,:)
+  complex(8),allocatable :: zu_basis(:,:,:)
+  complex(8),allocatable :: zH_loc(:,:,:),zPi_loc(:,:,:)
+  complex(8),allocatable :: zV_NL(:,:,:,:),zPi_NL(:,:,:,:)
+  complex(8),allocatable :: zH_tot(:,:,:),zPi_tot(:,:,:)
+  integer,parameter :: NAmax = 10
+  real(8) :: Amax,dAmax
+  real(8),allocatable :: Actot_BE(:),javt_BE(:)
+
+  complex(8),allocatable :: zCt(:,:,:),zACt_tmp(:),ztCt_tmp(:)
 
 end Module Global_Variables
 

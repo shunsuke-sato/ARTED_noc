@@ -72,6 +72,7 @@ subroutine preparation
     read(*,*) Ncg,Nscf
     read(*,*) Nt,dt,Npred_corr
     read(*,*) option_TD_band_dos,Nstep_TD_band_dos
+    read(*,*) option_IP
     read(*,*) dAc
     read(*,*) laser_type,Tr_Lo
     read(*,*) IWcm2_1,tpulsefs_1,omegaev_1,phi_CEP_1
@@ -95,6 +96,7 @@ subroutine preparation
     write(*,'(A,2(2x,I0))') 'Ncg,Nscf = ',Ncg,Nscf
     write(*,'(A,2x,I0,2x,e16.6e3)') 'Nt,dt = ',Nt,dt
     write(*,'(A,2x,A,2x,I6)')'option_TD_band_dos,Nstep_TD_band_dos = ',option_TD_band_dos,Nstep_TD_band_dos
+    write(*,'(A,2x,A)')'option_IP = ',option_IP
     write(*,'(A,2x,e16.6e3)') 'dAc = ',dAc
     write(*,'(A,2x,A,2x,A)') 'laser_type, Tr_Lo = ',laser_type,Tr_Lo
     write(*,'(A,2x,4(2x,e16.6e3))') 'IWcm2_1,tpulsefs_1,omegaev_1,phi_CEP_1 = ',IWcm2_1,tpulsefs_1,omegaev_1,phi_CEP_1
@@ -132,6 +134,7 @@ subroutine preparation
   call MPI_BCAST(dt,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(option_TD_band_dos,1,MPI_CHARACTER,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(Nstep_TD_band_dos,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+  call MPI_BCAST(option_IP,1,MPI_CHARACTER,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(Npred_corr,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(dAc,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(Tr_Lo,2,MPI_CHARACTER,0,MPI_COMM_WORLD,ierr)
