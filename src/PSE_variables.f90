@@ -34,7 +34,7 @@ module PSE_variables
   real(8),allocatable :: rho_nlcc(:),tau_nlcc(:)
   complex(8),allocatable :: ekr(:,:,:)
   real(8),allocatable :: Vpsl(:)
-
+  logical,allocatable :: flag_nlcc(:)
 
 end Module PSE_variables
 

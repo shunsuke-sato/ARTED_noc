@@ -42,7 +42,8 @@ Subroutine PSE_input_pseudopotential_YS
   allocate(radnl(Nrmax,NE))
   allocate(udVtbl(Nrmax,0:Lmax,NE))
   allocate(Vpsl(NL))
-
+  allocate(flag_nlcc(NE))
+  flag_nlcc(:) = .false.
 
   if(Myrank == 0)read(*,*) (Lref(j),j=1,NE)
   call MPI_BCAST(Lref,NE,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
@@ -268,6 +269,7 @@ Subroutine PSE_input_pseudopotential_YS
       enddo
 
       rho_nlcc_tbl(:,ik)=0d0; tau_nlcc_tbl(:,ik)=0d0
+      if(.not.flag_nlcc(ik))return
       do i=1,NRps(ik)
         if(rhor_nlcc(i-1,0)/rhor_nlcc(0,0) < 1d-7)exit
         rho_nlcc_tbl(i,ik)=rhor_nlcc(i-1,0)
@@ -425,13 +427,14 @@ Subroutine Read_PS_ABINITFHI(Lmax0,Nrmax0,Mr,rRC,upp,vpp,rhor_nlcc,ik,ps_file)
   end do
 !Nonlinear core-correction
   do i=1,Mr_l(0)
-    read(4,*) rad(i+1,ik),rhor_nlcc(i,0),rhor_nlcc(i,1),rhor_nlcc(i,2)
+    read(4,*,err=940) rad(i+1,ik),rhor_nlcc(i,0),rhor_nlcc(i,1),rhor_nlcc(i,2)
   end do
   rhor_nlcc(0,:)=rhor_nlcc(1,:)-(rhor_nlcc(2,:)-rhor_nlcc(1,:)) &
     /(rad(3,ik)-rad(2,ik))*(rad(2,ik))
   rhor_nlcc = rhor_nlcc/(4d0*pi)
+  flag_nlcc(ik) = .true.
 !Nonlinear core-correction
-  close(4)
+940  close(4)
 
   if(minval(Mr_l(0:Mlps(ik))).ne.maxval(Mr_l(0:Mlps(ik)))) then
     stop 'Mr are diffrent at Read_PS_FHI'
