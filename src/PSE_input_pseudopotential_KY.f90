@@ -427,7 +427,7 @@ Subroutine Read_PS_ABINITFHI(Lmax0,Nrmax0,Mr,rRC,upp,vpp,rhor_nlcc,ik,ps_file)
   end do
 !Nonlinear core-correction
   do i=1,Mr_l(0)
-    read(4,*,err=940) rad(i+1,ik),rhor_nlcc(i,0),rhor_nlcc(i,1),rhor_nlcc(i,2)
+    read(4,*,end=940) rad(i+1,ik),rhor_nlcc(i,0),rhor_nlcc(i,1),rhor_nlcc(i,2)
   end do
   rhor_nlcc(0,:)=rhor_nlcc(1,:)-(rhor_nlcc(2,:)-rhor_nlcc(1,:)) &
     /(rad(3,ik)-rad(2,ik))*(rad(2,ik))
@@ -435,6 +435,7 @@ Subroutine Read_PS_ABINITFHI(Lmax0,Nrmax0,Mr,rRC,upp,vpp,rhor_nlcc,ik,ps_file)
   flag_nlcc(ik) = .true.
 !Nonlinear core-correction
 940  close(4)
+  write(*,*)"Flag_nlcc=",  flag_nlcc(ik)
 
   if(minval(Mr_l(0:Mlps(ik))).ne.maxval(Mr_l(0:Mlps(ik)))) then
     stop 'Mr are diffrent at Read_PS_FHI'
