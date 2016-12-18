@@ -151,6 +151,8 @@ module global_variables
   real(8),allocatable :: Actot_BE(:),javt_BE(:)
 
   complex(8),allocatable :: zCt(:,:,:),zACt_tmp(:),ztCt_tmp(:)
+  integer,parameter :: NLanczos = 16
+  complex(8),allocatable :: zLanCt(:,:,:),zACt_Lan(:,:),ztCt_Lan(:,:)
 
 end Module Global_Variables
 
