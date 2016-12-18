@@ -72,7 +72,7 @@ subroutine PSE_preparation_basis_set
     kAc_Cvec(2,:)=kAc0_Cvec(2,:)+kshift(2,ikshift)
     kAc_Cvec(3,:)=kAc0_Cvec(3,:)+kshift(3,ikshift)
 
-    do iter_scf=1,Nscf
+    do iter_scf=1,Nscf/2
       if(myrank == 0)write(*,*)kAc_Cvec(:,1)
       if(Myrank == 0)write(*,'(A,2X,I5)')'iter_scf = ',iter_scf
 
