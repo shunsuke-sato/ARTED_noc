@@ -74,20 +74,20 @@ subroutine BE_dt_evolve(Act_t)
       integer :: iLan
       real(8) :: alpha(NLanczos,NB_TD),beta(NLanczos,NB_TD)
       real(8) :: Hmat_Lan(NLanczos,NLanczos,NB_TD)
-      complex(8) :: zvec(Nlanczos)
+      complex(8),allocatable :: zvec(:)
       real(8) :: ss
 !LAPACK ==
       integer :: lwork,Nmat
       real(8),allocatable :: work_lp(:),Amat(:,:)
       real(8),allocatable :: rwork(:),w(:)
       integer :: info
-      Nmat = Nlanczos
-      lwork=6*(Nmat)**2
-      allocate(work_lp(lwork),rwork(3*Nmat-2),w(Nmat),Amat(Nmat,Nmat))
 !LAPACK ==
+
+
 
       K_point : do ik=NK_s,NK_e
 
+        Nmat = 0
         do ib=1,NB_TD        
           ss = sum(abs(zCt(:,ib,ik))**2)
           zLanCt(:,ib,1) = zCt(:,ib,ik)/sqrt(ss)
@@ -110,23 +110,36 @@ subroutine BE_dt_evolve(Act_t)
 
           do ib=1,NB_TD
             beta(iLan+1,ib)=sqrt(sum(abs(zLanCt(:,ib,iLan+1))**2)  )
+          end do
+          if(minval(beta(iLan+1,:)) < epsilon_Lan)then
+            Nmat = iLan
+            write(*,"(A,2x,3I7)")"Lanzcos break, Nmat,ik,myrank",Nmat,ik,myrank
+            exit
+          end if
+          do ib=1,NB_TD
             zLanCt(:,ib,iLan+1) = zLanCt(:,ib,iLan+1)/beta(iLan+1,ib)
           end do
 
         end do
 
-        ztCt_Lan(:,:) = zLanCt(:,:,NLanczos)
-        zACt_Lan(:,:) = matmul(zH_tot(:,:,ik),ztCt_Lan(:,:))
-        do ib=1,NB_TD
-          alpha(NLanczos,ib)=sum(conjg(ztCt_Lan(:,ib))*zACt_Lan(:,ib) )
-        end do
+        if(Nmat == 0)then
+          Nmat = Nlanczos
+          ztCt_Lan(:,:) = zLanCt(:,:,Nmat)
+          zACt_Lan(:,:) = matmul(zH_tot(:,:,ik),ztCt_Lan(:,:))
+          do ib=1,NB_TD
+            alpha(Nmat,ib)=sum(conjg(ztCt_Lan(:,ib))*zACt_Lan(:,ib) )
+          end do
+        end if
+
+        lwork=6*(Nmat)**2
+        allocate(work_lp(lwork),rwork(3*Nmat-2),w(Nmat),Amat(Nmat,Nmat),zvec(Nmat))
 
         do ib=1,NB_TD
           Amat = 0d0
-          do iLan=1,NLanczos
+          do iLan=1,Nmat
             Amat(iLan,iLan)=alpha(iLan,ib)
           end do
-          do iLan = 2,Nlanczos
+          do iLan = 2,Nmat
             Amat(iLan-1,iLan) = beta(iLan,ib)
             Amat(iLan,iLan-1) = beta(iLan,ib)
           end do
@@ -136,9 +149,10 @@ subroutine BE_dt_evolve(Act_t)
           zvec = matmul(transpose(Amat),zvec)
           zvec(:) = exp(-zI*dt*w(:))*zvec(:)
           zvec = matmul(Amat,zvec)
-          zCt(:,ib,ik)=matmul(zLanCt(:,ib,1:NLanczos),zvec(1:NLanczos))
+          zCt(:,ib,ik)=matmul(zLanCt(:,ib,1:Nmat),zvec(1:Nmat))
         end do
 
+        deallocate(work_lp,rwork,w,Amat,zvec)
 
       end do K_point
     end subroutine BE_dt_evolve_Lanczos

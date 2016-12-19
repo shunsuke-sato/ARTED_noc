@@ -153,6 +153,7 @@ module global_variables
   complex(8),allocatable :: zCt(:,:,:),zACt_tmp(:),ztCt_tmp(:)
   integer,parameter :: NLanczos = 16
   complex(8),allocatable :: zLanCt(:,:,:),zACt_Lan(:,:),ztCt_Lan(:,:)
+  real(8),parameter :: epsilon_Lan = 1d-12
 
 end Module Global_Variables
 
