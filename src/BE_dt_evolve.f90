@@ -17,6 +17,7 @@ subroutine BE_dt_evolve(Act_t)
   use global_variables
   use PSE_variables
   real(8) :: Act_t
+  real(8),parameter :: eps_Act = 1d-6
   integer :: iav, iav_t
   real(8) :: diff,xx
   integer :: ik,ib,iexp
@@ -41,32 +42,45 @@ subroutine BE_dt_evolve(Act_t)
     call err_finalize
   end if
 
+  if(abs(Act_t) < eps_Act)then
+    xx = (Act_t-dble(iav_t)*dAmax)/dAmax
+    if(iav_t == 0)then
+      zdH_tot(:,:,:) = 0.5d0*zV_NL(:,:,:,iav_t+1)*(xx+1d0) &
+        +0.5d0*zV_NL(:,:,:,iav_t-1)*(xx-1d0) &
+        +      zV_NL(:,:,:,iav_t)*( - xx)
+      zdH_tot(:,:,:) = zdH_tot(:,:,:)/dAmax
 
-  xx = (Act_t-dble(iav_t)*dAmax)/dAmax
-  if(iav_t == 0)then
-    zdH_tot(:,:,:) = 0.5d0*zV_NL(:,:,:,iav_t+1)*(xx+1d0) &
-                    +0.5d0*zV_NL(:,:,:,iav_t-1)*(xx-1d0) &
-                    +      zV_NL(:,:,:,iav_t)*( - xx)
-    zdH_tot(:,:,:) = zdH_tot(:,:,:)/dAmax
+    else
 
-  else
-
-    zdH_tot(:,:,:) = 0.5d0*zV_NL(:,:,:,iav_t+1)*(xx**2+xx) &
-                   +0.5d0*zV_NL(:,:,:,iav_t-1)*(xx**2-xx) &
-                   +      zV_NL(:,:,:,iav_t)*(1d0 - xx**2)
-    zdH_tot(:,:,:) = (zdH_tot(:,:,:) - zV_NL(:,:,:,0))/Act_t
-  end if
-  zdH_tot = zdH_tot + zPi_loc
-  do ib = 1,NB_basis
-    zdH_tot(ib,ib,:) = zdH_tot(ib,ib,:) + 0.5d0*Act_t
-  end do
+      zdH_tot(:,:,:) = 0.5d0*zV_NL(:,:,:,iav_t+1)*(xx**2+xx) &
+        +0.5d0*zV_NL(:,:,:,iav_t-1)*(xx**2-xx) &
+        +      zV_NL(:,:,:,iav_t)*(1d0 - xx**2)
+      zdH_tot(:,:,:) = (zdH_tot(:,:,:) - zV_NL(:,:,:,0))/Act_t
+    end if
+    zdH_tot = zdH_tot + zPi_loc
+    do ib = 1,NB_basis
+      zdH_tot(ib,ib,:) = zdH_tot(ib,ib,:) + 0.5d0*Act_t
+    end do
 !== construct current matrix end
 
-!  call BE_dt_half_evolve_Taylor
-  call BE_dt_half_evolve_Lanczos
-  call BE_dt_evolve_Free
-!  call BE_dt_half_evolve_Taylor
-  call BE_dt_half_evolve_Lanczos
+    call BE_dt_half_evolve_Taylor
+!  call BE_dt_half_evolve_Lanczos
+    call BE_dt_evolve_Free
+    call BE_dt_half_evolve_Taylor
+!  call BE_dt_half_evolve_Lanczos
+  else
+
+    xx = (Act_t-dble(iav_t)*dAmax)/dAmax
+    zH_tot(:,:,:) = 0.5d0*zV_NL(:,:,:,iav_t+1)*(xx**2+xx) &
+      +0.5d0*zV_NL(:,:,:,iav_t-1)*(xx**2-xx) &
+      +      zV_NL(:,:,:,iav_t)*(1d0 - xx**2)
+    zH_tot = zH_tot + zH_loc + zPi_loc*Act_t
+    do ib = 1,NB_basis
+      zH_tot(ib,ib,:) = zH_tot(ib,ib,:) + 0.5d0*Act_t**2
+    end do
+
+    call BE_dt_full_evolve_Lanczos
+  end if
 
   return
   contains
@@ -97,7 +111,7 @@ subroutine BE_dt_evolve(Act_t)
 
           zfact = 1d0
           ztCt_tmp(:)=zCt(:,ib,ik)
-          do iexp = 1,4
+          do iexp = 1,8
             zfact = zfact*(-zI*(dt*Act_t)*0.5d0)/dble(iexp)
             zACt_tmp(:) = matmul(zdH_tot(:,:,ik),ztCt_tmp(:))
             zCt(:,ib,ik) = zCt(:,ib,ik) + zfact*zACt_tmp(:)
@@ -195,6 +209,95 @@ subroutine BE_dt_evolve(Act_t)
 
       end do K_point
     end subroutine BE_dt_half_evolve_Lanczos
+
+
+    subroutine BE_dt_full_evolve_Lanczos
+      implicit none
+      integer :: iLan
+      real(8) :: alpha(NLanczos,NB_TD),beta(NLanczos,NB_TD)
+      real(8) :: Hmat_Lan(NLanczos,NLanczos,NB_TD)
+      complex(8),allocatable :: zvec(:)
+      real(8) :: ss
+!LAPACK ==
+      integer :: lwork,Nmat
+      real(8),allocatable :: work_lp(:),Amat(:,:)
+      real(8),allocatable :: rwork(:),w(:)
+      integer :: info
+!LAPACK ==
+
+
+
+      K_point : do ik=NK_s,NK_e
+
+        Nmat = 0
+        do ib=1,NB_TD        
+          ss = sum(abs(zCt(:,ib,ik))**2)
+          zLanCt(:,ib,1) = zCt(:,ib,ik)/sqrt(ss)
+        end do
+        beta(1,:) = 0d0
+
+        do iLan=1,NLanczos-1
+          ztCt_Lan(:,:) = zLanCt(:,:,iLan)
+          zACt_Lan(:,:) = matmul(zH_tot(:,:,ik),ztCt_Lan(:,:))
+
+          do ib=1,NB_TD
+            alpha(iLan,ib)=sum(conjg(ztCt_Lan(:,ib))*zACt_Lan(:,ib) )
+          end do
+
+          do ib=1,NB_TD
+            zLanCt(:,ib,iLan+1) = zAct_Lan(:,ib) &
+              -alpha(iLan,ib)*zLanCt(:,ib,iLan) &
+              -beta(iLan,ib)*zLanCt(:,ib,iLan-1)
+          end do
+
+          do ib=1,NB_TD
+            beta(iLan+1,ib)=sqrt(sum(abs(zLanCt(:,ib,iLan+1))**2)  )
+          end do
+          if(minval(beta(iLan+1,:)) < epsilon_Lan)then
+            Nmat = iLan
+            write(*,"(A,2x,3I7)")"Lanzcos break, Nmat,ik,myrank",Nmat,ik,myrank
+            exit
+          end if
+          do ib=1,NB_TD
+            zLanCt(:,ib,iLan+1) = zLanCt(:,ib,iLan+1)/beta(iLan+1,ib)
+          end do
+
+        end do
+
+        if(Nmat == 0)then
+          Nmat = Nlanczos
+          ztCt_Lan(:,:) = zLanCt(:,:,Nmat)
+          zACt_Lan(:,:) = matmul(zH_tot(:,:,ik),ztCt_Lan(:,:))
+          do ib=1,NB_TD
+            alpha(Nmat,ib)=sum(conjg(ztCt_Lan(:,ib))*zACt_Lan(:,ib) )
+          end do
+        end if
+
+        lwork=6*(Nmat)**2
+        allocate(work_lp(lwork),rwork(3*Nmat-2),w(Nmat),Amat(Nmat,Nmat),zvec(Nmat))
+
+        do ib=1,NB_TD
+          Amat = 0d0
+          do iLan=1,Nmat
+            Amat(iLan,iLan)=alpha(iLan,ib)
+          end do
+          do iLan = 2,Nmat
+            Amat(iLan-1,iLan) = beta(iLan,ib)
+            Amat(iLan,iLan-1) = beta(iLan,ib)
+          end do
+
+          Call dsyev('V', 'U', Nmat, Amat, Nmat, w, work_lp, lwork, info) 
+          zvec = 0d0; zvec(1) = 1d0
+          zvec = matmul(transpose(Amat),zvec)
+          zvec(:) = exp(-zI*dt*w(:))*zvec(:)
+          zvec = matmul(Amat,zvec)
+          zCt(:,ib,ik)=matmul(zLanCt(:,ib,1:Nmat),zvec(1:Nmat))
+        end do
+
+        deallocate(work_lp,rwork,w,Amat,zvec)
+
+      end do K_point
+    end subroutine BE_dt_full_evolve_Lanczos
 
 end subroutine BE_dt_evolve
   
