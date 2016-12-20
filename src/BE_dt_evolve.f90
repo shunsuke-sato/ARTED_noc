@@ -22,6 +22,12 @@ subroutine BE_dt_evolve(Act_t)
   integer :: ik,ib,iexp
   complex(8) :: zfact
 
+  if(Act_t == 0d0)then
+    ! free propagation
+  call BE_dt_evolve_Free
+    return
+  end if
+
 !== construct current matrix start
   diff = 1d10
   do iav = -NAmax,NAmax
@@ -35,22 +41,55 @@ subroutine BE_dt_evolve(Act_t)
     call err_finalize
   end if
 
+
   xx = (Act_t-dble(iav_t)*dAmax)/dAmax
-  zH_tot(:,:,:) = 0.5d0*zV_NL(:,:,:,iav_t+1)*(xx**2+xx) &
-                  +0.5d0*zV_NL(:,:,:,iav_t-1)*(xx**2-xx) &
-                  +      zV_NL(:,:,:,iav_t)*(1d0 - xx**2)
-  zH_tot = zH_tot + zH_loc + zPi_loc*Act_t
+  if(iav_t == 0)then
+    zdH_tot(:,:,:) = 0.5d0*zV_NL(:,:,:,iav_t+1)*(xx+1d0) &
+                    +0.5d0*zV_NL(:,:,:,iav_t-1)*(xx-1d0) &
+                    +      zV_NL(:,:,:,iav_t)*( - xx)
+    zdH_tot(:,:,:) = zdH_tot(:,:,:)/dAmax
+
+  else
+
+    zdH_tot(:,:,:) = 0.5d0*zV_NL(:,:,:,iav_t+1)*(xx**2+xx) &
+                   +0.5d0*zV_NL(:,:,:,iav_t-1)*(xx**2-xx) &
+                   +      zV_NL(:,:,:,iav_t)*(1d0 - xx**2)
+    zdH_tot(:,:,:) = (zdH_tot(:,:,:) - zV_NL(:,:,:,0))/Act_t
+  end if
+  zdH_tot = zdH_tot + zPi_loc
   do ib = 1,NB_basis
-    zH_tot(ib,ib,:) = zH_tot(ib,ib,:) + 0.5d0*Act_t**2
+    zdH_tot(ib,ib,:) = zdH_tot(ib,ib,:) + 0.5d0*Act_t
   end do
 !== construct current matrix end
 
-!  call BE_dt_evolve_Taylor
-  call BE_dt_evolve_Lanczos
+!  call BE_dt_half_evolve_Taylor
+  call BE_dt_half_evolve_Lanczos
+  call BE_dt_evolve_Free
+!  call BE_dt_half_evolve_Taylor
+  call BE_dt_half_evolve_Lanczos
 
   return
   contains
-    subroutine BE_dt_evolve_Taylor
+
+    subroutine BE_dt_evolve_Free
+      implicit none
+      complex(8) :: zvec0(NB_basis)
+
+      K_point : do ik=NK_s,NK_e
+        Band : do ib=1,NB_TD
+
+          zvec0 = matmul(transpose(conjg(zC_eig(:,:,ik))),zCt(:,ib,ik))
+          zvec0(:) = exp(-zI*H0_eigval(:,ik)*dt)*zvec0(:)
+          zCt(:,ib,ik) = matmul(zC_eig(:,:,ik),zvec0(:))
+
+        end do Band
+      end do K_point
+
+      return
+    end subroutine BE_dt_evolve_Free
+
+
+    subroutine BE_dt_half_evolve_Taylor
       implicit none
 
       K_point : do ik=NK_s,NK_e
@@ -59,17 +98,17 @@ subroutine BE_dt_evolve(Act_t)
           zfact = 1d0
           ztCt_tmp(:)=zCt(:,ib,ik)
           do iexp = 1,4
-            zfact = zfact*(-zI*dt)/dble(iexp)
-            zACt_tmp(:) = matmul(zH_tot(:,:,ik),ztCt_tmp(:))
+            zfact = zfact*(-zI*(dt*Act_t)*0.5d0)/dble(iexp)
+            zACt_tmp(:) = matmul(zdH_tot(:,:,ik),ztCt_tmp(:))
             zCt(:,ib,ik) = zCt(:,ib,ik) + zfact*zACt_tmp(:)
             ztCt_tmp(:) = zACt_tmp(:)
           end do
 
         end do Band
       end do K_point
-    end subroutine BE_dt_evolve_Taylor
+    end subroutine BE_dt_half_evolve_Taylor
 
-    subroutine BE_dt_evolve_Lanczos
+    subroutine BE_dt_half_evolve_Lanczos
       implicit none
       integer :: iLan
       real(8) :: alpha(NLanczos,NB_TD),beta(NLanczos,NB_TD)
@@ -96,7 +135,7 @@ subroutine BE_dt_evolve(Act_t)
 
         do iLan=1,NLanczos-1
           ztCt_Lan(:,:) = zLanCt(:,:,iLan)
-          zACt_Lan(:,:) = matmul(zH_tot(:,:,ik),ztCt_Lan(:,:))
+          zACt_Lan(:,:) = matmul(zdH_tot(:,:,ik),ztCt_Lan(:,:))
 
           do ib=1,NB_TD
             alpha(iLan,ib)=sum(conjg(ztCt_Lan(:,ib))*zACt_Lan(:,ib) )
@@ -125,7 +164,7 @@ subroutine BE_dt_evolve(Act_t)
         if(Nmat == 0)then
           Nmat = Nlanczos
           ztCt_Lan(:,:) = zLanCt(:,:,Nmat)
-          zACt_Lan(:,:) = matmul(zH_tot(:,:,ik),ztCt_Lan(:,:))
+          zACt_Lan(:,:) = matmul(zdH_tot(:,:,ik),ztCt_Lan(:,:))
           do ib=1,NB_TD
             alpha(Nmat,ib)=sum(conjg(ztCt_Lan(:,ib))*zACt_Lan(:,ib) )
           end do
@@ -147,7 +186,7 @@ subroutine BE_dt_evolve(Act_t)
           Call dsyev('V', 'U', Nmat, Amat, Nmat, w, work_lp, lwork, info) 
           zvec = 0d0; zvec(1) = 1d0
           zvec = matmul(transpose(Amat),zvec)
-          zvec(:) = exp(-zI*dt*w(:))*zvec(:)
+          zvec(:) = exp(-zI*(dt*Act_t)*0.5d0*w(:))*zvec(:)
           zvec = matmul(Amat,zvec)
           zCt(:,ib,ik)=matmul(zLanCt(:,ib,1:Nmat),zvec(1:Nmat))
         end do
@@ -155,7 +194,7 @@ subroutine BE_dt_evolve(Act_t)
         deallocate(work_lp,rwork,w,Amat,zvec)
 
       end do K_point
-    end subroutine BE_dt_evolve_Lanczos
+    end subroutine BE_dt_half_evolve_Lanczos
 
 end subroutine BE_dt_evolve
   

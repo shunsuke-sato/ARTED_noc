@@ -146,15 +146,16 @@ module global_variables
   complex(8),allocatable :: zH_loc(:,:,:),zPi_loc(:,:,:)
   complex(8),allocatable :: zV_NL(:,:,:,:),zPi_NL(:,:,:,:)
   complex(8),allocatable :: zH_tot(:,:,:),zPi_tot(:,:,:)
+  complex(8),allocatable :: zH0_tot(:,:,:),zdH_tot(:,:,:)
+  real(8),allocatable :: H0_eigval(:,:)
   integer,parameter :: NAmax = 10
   real(8) :: Amax,dAmax
   real(8),allocatable :: Actot_BE(:),javt_BE(:)
 
   complex(8),allocatable :: zCt(:,:,:),zACt_tmp(:),ztCt_tmp(:)
+  complex(8),allocatable :: zC_eig(:,:,:)
   integer,parameter :: NLanczos = 16
   complex(8),allocatable :: zLanCt(:,:,:),zACt_Lan(:,:),ztCt_Lan(:,:)
   real(8),parameter :: epsilon_Lan = 1d-12
 
 end Module Global_Variables
-
-
