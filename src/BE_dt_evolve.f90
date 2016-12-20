@@ -155,11 +155,18 @@ subroutine BE_dt_evolve(Act_t)
             alpha(iLan,ib)=sum(conjg(ztCt_Lan(:,ib))*zACt_Lan(:,ib) )
           end do
 
-          do ib=1,NB_TD
-            zLanCt(:,ib,iLan+1) = zAct_Lan(:,ib) &
-              -alpha(iLan,ib)*zLanCt(:,ib,iLan) &
-              -beta(iLan,ib)*zLanCt(:,ib,iLan-1)
-          end do
+          if(iLan /= 1)then
+            do ib=1,NB_TD
+              zLanCt(:,ib,iLan+1) = zAct_Lan(:,ib) &
+                -alpha(iLan,ib)*zLanCt(:,ib,iLan) &
+                -beta(iLan,ib)*zLanCt(:,ib,iLan-1)
+            end do
+          else
+            do ib=1,NB_TD
+              zLanCt(:,ib,iLan+1) = zAct_Lan(:,ib) &
+                -alpha(iLan,ib)*zLanCt(:,ib,iLan)
+            end do
+          end if
 
           do ib=1,NB_TD
             beta(iLan+1,ib)=sqrt(sum(abs(zLanCt(:,ib,iLan+1))**2)  )
@@ -244,11 +251,18 @@ subroutine BE_dt_evolve(Act_t)
             alpha(iLan,ib)=sum(conjg(ztCt_Lan(:,ib))*zACt_Lan(:,ib) )
           end do
 
-          do ib=1,NB_TD
-            zLanCt(:,ib,iLan+1) = zAct_Lan(:,ib) &
-              -alpha(iLan,ib)*zLanCt(:,ib,iLan) &
-              -beta(iLan,ib)*zLanCt(:,ib,iLan-1)
-          end do
+          if(iLan /= 1)then
+            do ib=1,NB_TD
+              zLanCt(:,ib,iLan+1) = zAct_Lan(:,ib) &
+                -alpha(iLan,ib)*zLanCt(:,ib,iLan) &
+                -beta(iLan,ib)*zLanCt(:,ib,iLan-1)
+            end do
+          else
+            do ib=1,NB_TD
+              zLanCt(:,ib,iLan+1) = zAct_Lan(:,ib) &
+                -alpha(iLan,ib)*zLanCt(:,ib,iLan) 
+            end do
+          end if
 
           do ib=1,NB_TD
             beta(iLan+1,ib)=sqrt(sum(abs(zLanCt(:,ib,iLan+1))**2)  )
