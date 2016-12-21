@@ -18,6 +18,7 @@
 ! Device number 10-99: temporary files, 100: permanent files
 ! 102:trim(SYSname)//'_jac.out'
 ! 103:trim(SYSname)//'_nex.out'
+! 104:trim(SYSname)//'_eex.out'
 
 program main
   use global_variables
