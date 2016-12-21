@@ -24,6 +24,11 @@ subroutine PSE_real_time_propagation_basis_expansion
   call init_wf_basis_expansion
   call init_Ac_basis_expansion
 
+  if(myrank == 0)open(104,file=trim(SYSname)//'_eex.out')
+  Act_t = 0d0
+  call BE_energy(Act_t); Etot_GS = Etot_RT
+  if(myrank==0)write(104,"(999e26.16e3)")0d0,Etot_RT,Etot_RT-Etot_GS
+
 !== Start current
   Act_t = Actot_BE(0)
   call BE_current(jav,Act_t)
@@ -42,6 +47,12 @@ subroutine PSE_real_time_propagation_basis_expansion
   javt_BE(iter+1)=jav
 !== End current
 
+!== Start energy
+  if(mod(iter,10) == 0 .or. iter==Nt)then
+    call BE_energy(Act_t)
+    if(myrank==0)write(104,"(999e26.16e3)")dt*dble(iter+1),Etot_RT,Etot_RT-Etot_GS
+  end if
+
 !== Start writing section
   if(mod(iter,400) == 0 .or. iter == Nt)then
     if(myrank == 0)then
@@ -56,6 +67,8 @@ subroutine PSE_real_time_propagation_basis_expansion
 
   end do
 
+
+  if(myrank == 0)close(104)
   if(myrank == 0)write(*,"(A)")"== End real-time propagation with basis expansion."
 
   return

@@ -78,7 +78,7 @@ module global_variables
 
 ! physical quantity
   real(8),allocatable :: esp(:,:),esp_l(:,:)
-  real(8) :: Etot_GS,Ekin_GS
+  real(8) :: Etot_GS,Ekin_GS,Etot_RT
 
 ! material
   integer :: NI,NE,Nelec
