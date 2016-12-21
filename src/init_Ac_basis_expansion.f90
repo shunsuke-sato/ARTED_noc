@@ -44,19 +44,19 @@ subroutine init_Ac_basis_expansion
     do iter=0,Nt+2
       tt=iter*dt
       if (tt<tpulse_1) then
-        Actot_BE(iter)=-f0_1/omega_1*(sin(pi*tt/tpulse_1))**2*cos(omega_1*tt+phi_CEP_1*2d0*pi)
+        Actot_BE(iter)=-f0_1/omega_1*(cos(pi*(tt-0.5d0*tpulse_1)/tpulse_1))**2*sin(omega_1*(tt-0.5d0*tpulse_1)+phi_CEP_1*2d0*pi)
       end if
     enddo
 ! probe laser
     do iter=0,Nt+2
       tt=iter*dt
-      if ( (tt-T1_T2>0d0) .and. (tt-T1_T2<tpulse_2) ) then
+      if ( (tt>0.5d0*(tpulse_1-tpulse_2)+T1_T2) .and. (tt>0.5d0*(tpulse_1-tpulse_2)+T1_T2+tpulse_2) ) then
         Actot_BE(iter)=Actot_BE(iter) &
-          &-f0_2/omega_2*(sin(pi*(tt-T1_T2)/tpulse_2))**2*cos(omega_2*(tt-T1_T2)+phi_CEP_2*2d0*pi)
+          &-f0_2/omega_2*(cos(pi*(tt-(0.5d0*tpulse_1+T1_T2))/tpulse_2))**2*sin(omega_2*(tt-(0.5d0*tpulse_1+T1_T2))+phi_CEP_2*2d0*pi)
       endif
     enddo
   case('cos4cos')
-! pulse shape : A(t)=f0/omega*sin(Pi t/T)**2 *cos (omega t+phi_CEP*2d0*pi) 
+! pulse shape : A(t)=f0/omega*sin(Pi t/T)**4 *cos (omega t+phi_CEP*2d0*pi) 
 ! pump laser
     do iter=0,Nt+2
       tt=iter*dt
