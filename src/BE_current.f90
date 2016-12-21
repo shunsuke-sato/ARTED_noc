@@ -35,6 +35,8 @@ subroutine BE_current(jav,Act_t)
       iav_t = iav
     end if
   end do
+  if(iav_t == NAmax)iav_t=NAmax -1
+  if(iav_t == -NAmax)iav_t=-NAmax +1
   if(abs(Act_t) > Amax)then
     err_message='Amax is too small.'
     call err_finalize
