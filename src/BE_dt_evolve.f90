@@ -37,7 +37,7 @@ subroutine BE_dt_evolve(Act_t)
       iav_t = iav
     end if
   end do
-  if(abs(iav_t) == NAmax)then
+  if(abs(Act_t) > Amax)then
     err_message='Amax is too small.'
     call err_finalize
   end if
