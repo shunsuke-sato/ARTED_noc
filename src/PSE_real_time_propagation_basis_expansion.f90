@@ -67,7 +67,7 @@ subroutine PSE_real_time_propagation_basis_expansion
 
   end do
 
-
+  call BE_excited_electrons
   if(myrank == 0)close(104)
   if(myrank == 0)write(*,"(A)")"== End real-time propagation with basis expansion."
 
