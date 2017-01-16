@@ -30,7 +30,7 @@ subroutine BE_excited_electrons
     do ib1 = 1,NB_TD
       do ib2 = 1,NB_basis
 
-        occ_t_l(ib2,ib1,ik) = abs(sum(conjg(zC_eig(:,ib2,ik))*zCt(:,ib1,ik)))**2/dble(NK)
+        occ_t_l(ib2,ib1,ik) = 2d0*abs(sum(conjg(zC_eig(:,ib2,ik))*zCt(:,ib1,ik)))**2/dble(NK)
 
       end do
     end do
@@ -53,8 +53,9 @@ subroutine BE_excited_electrons
     close(701)
 
     open(701,file="dist_nex.out")
-    write(701,"(A,2x,3I7)")"#NB_basis,NB_TD,NK=",NB_basis,NB_TD,NK
-    do ik = NK_s,NK_e
+    write(701,"(A)")"#NB_basis,NK="
+    write(701,"(2I7)")NB_basis,NK
+    do ik = 1,NK
       do ib2 = 1,NB_basis
         write(701,"(999e26.16e3)")eig(ib2,ik),sum(occ_t(ib2,:,ik))
       end do
