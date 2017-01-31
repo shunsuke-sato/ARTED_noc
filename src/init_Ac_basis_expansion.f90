@@ -67,7 +67,7 @@ subroutine init_Ac_basis_expansion
 ! probe laser
     do iter=0,Nt+2
       tt=iter*dt
-      if ( (tt>0.5d0*(tpulse_1-tpulse_2)+T1_T2) .and. (tt>0.5d0*(tpulse_1-tpulse_2)+T1_T2+tpulse_2) ) then
+      if ( (tt-0.5d0*tpulse_1 - T1_T2 >-0.5*tpulse_2) .and. (tt-0.5d0*tpulse_1 - T1_T2 < 0.5*tpulse_2) ) then
         Actot_BE(iter)=Actot_BE(iter) &
           &-f0_2/omega_2*(cos(pi*(tt-(0.5d0*tpulse_1+T1_T2))/tpulse_2))**4*sin(omega_2*(tt-(0.5d0*tpulse_1+T1_T2))+phi_CEP_2*2d0*pi)
       endif
