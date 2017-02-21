@@ -22,7 +22,11 @@ subroutine PSE_real_time_propagation_basis_expansion
   if(myrank == 0)write(*,"(A)")"== Start real-time propagation with basis expansion."
 
   call init_wf_basis_expansion
-  call init_Ac_basis_expansion
+  if(switch_Houston_probe_decomposition)then
+    call init_Ac_basis_expansion_Houston_probe_decomp
+  else
+    call init_Ac_basis_expansion
+  end if
 
   if(myrank == 0)open(104,file=trim(SYSname)//'_eex.out')
   Act_t = 0d0
@@ -37,8 +41,13 @@ subroutine PSE_real_time_propagation_basis_expansion
 
   do iter=0,Nt
 !== Start dt_evolve
-    Act_t = 0.5d0*( Actot_BE(iter+1) + Actot_BE(iter) )
-    call BE_dt_evolve(Act_t)
+    if(switch_Houston_probe_decomposition)then
+      Act_t = 0.5d0*( Actot_BE(iter+1) + Actot_BE(iter) )
+      call BE_dt_evolve_Houston_probe_decomp(iter,Act)
+    else
+      Act_t = 0.5d0*( Actot_BE(iter+1) + Actot_BE(iter) )
+      call BE_dt_evolve(Act_t)
+    end if
 !== End dt_evolve
 
 !== Start current
