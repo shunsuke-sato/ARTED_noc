@@ -24,6 +24,7 @@ subroutine PSE_real_time_propagation_basis_expansion
   call init_wf_basis_expansion
   if(switch_Houston_probe_decomposition)then
     call init_Ac_basis_expansion_Houston_probe_decomp
+    call blocking_matrix_for_Houston_probe_decomp
   else
     call init_Ac_basis_expansion
   end if

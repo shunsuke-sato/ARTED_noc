@@ -106,7 +106,7 @@ subroutine BE_dt_evolve_Houston_probe_decomp(iter,Act_t)
     call zheev('V', 'U', NB_basis, zMat_diag, NB_basis, w, work_lp, lwork, rwork, info)
     zdH_tot(:,:,ik) = matmul(zPi_tot(:,:,ik),zMat_diag(:,:))
     zPi_tot(:,:,ik) = matmul(transpose(conjg(zMat_diag(:,:))),zdH_tot(:,:,ik))
-    zdH_tot(:,:,ik) = zPi_tot(:,:,ik)*Ac_probe_BE(iter)
+    zdH_tot(:,:,ik) = zPi_tot(:,:,ik)*Ac_probe_BE(iter)*Mask_probe(:,:)
 
     zvec_t(:,:) = matmul(transpose(conjg(zMat_diag(:,:))),zCt(:,:,ik))
 
@@ -197,7 +197,7 @@ subroutine BE_dt_evolve_Houston_probe_decomp(iter,Act_t)
     call zheev('V', 'U', NB_basis, zMat_diag, NB_basis, w, work_lp, lwork, rwork, info)
     zdH_tot(:,:,ik) = matmul(zPi_tot(:,:,ik),zMat_diag(:,:))
     zPi_tot(:,:,ik) = matmul(transpose(conjg(zMat_diag(:,:))),zdH_tot(:,:,ik))
-    zdH_tot(:,:,ik) = zPi_tot(:,:,ik)*Ac_probe_BE(iter+1)
+    zdH_tot(:,:,ik) = zPi_tot(:,:,ik)*Ac_probe_BE(iter+1)*Mask_probe(:,:)
 
     zvec_t(:,:) = matmul(transpose(conjg(zMat_diag(:,:))),zCt(:,:,ik))
 

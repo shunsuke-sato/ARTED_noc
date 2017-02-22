@@ -162,4 +162,5 @@ module global_variables
 ! Houson basis decomposition
   logical,parameter :: switch_Houston_probe_decomposition = .false. !! .true.
   real(8),allocatable :: Ac_pump_BE(:),Ac_probe_BE(:)
+  real(8),allocatable :: Mask_probe(:,:)
 end Module Global_Variables
