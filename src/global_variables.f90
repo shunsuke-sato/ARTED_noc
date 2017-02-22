@@ -17,6 +17,7 @@
 ! Lvec: Lattice
 ! Rvec: Reciprocal lattice
 module global_variables
+  implicit none
 !ARTED version
   character(50),parameter :: CODE_ver='crab.2014.09.13.0'
 
@@ -158,4 +159,8 @@ module global_variables
   complex(8),allocatable :: zLanCt(:,:,:),zACt_Lan(:,:),ztCt_Lan(:,:)
   real(8),parameter :: epsilon_Lan = 1d-12
 
+! Houson basis decomposition
+  logical,parameter :: switch_Houston_probe_decomposition = .false. !! .true.
+  real(8),allocatable :: Ac_pump_BE(:),Ac_probe_BE(:)
+  real(8),allocatable :: Mask_probe(:,:)
 end Module Global_Variables
