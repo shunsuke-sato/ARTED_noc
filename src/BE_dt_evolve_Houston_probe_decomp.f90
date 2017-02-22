@@ -48,7 +48,7 @@ subroutine BE_dt_evolve_Houston_probe_decomp(iter,Act_t)
 
 !!=== start the propagation (t => t + dt/2) ===
 
-  Act_tmp = Act_pump_BE(it)
+  Act_tmp = Ac_pump_BE(it)
 !== construct current matrix start
   diff = 1d10
   do iav = -NAmax,NAmax
@@ -104,7 +104,8 @@ subroutine BE_dt_evolve_Houston_probe_decomp(iter,Act_t)
     zMat_diag(:,:)=zH_tot(:,:,ik)
     call zheev('V', 'U', NB_basis, zMat_diag, NB_basis, w, work_lp, lwork, rwork, info)
     zdH_tot(:,:,ik) = matmul(zPi_tot(:,:,ik),zMat_diag(:,:))
-    zdH_tot(:,:,ik) = matmul(transpose(conjg(zMat_diag(:,:))),zdH_tot(:,:,ik))*Ac_probe_BE(it)
+    zPi_tot(:,:,ik) = matmul(transpose(conjg(zMat_diag(:,:))),zdH_tot(:,:,ik))
+    zdH_tot(:,:,ik) = zPi_tot(:,:,ik)*Ac_probe_BE(it)
 
     zvec_t(:,:) = matmul(transpose(conjg(zMat_diag(:,:))),zCt(:,:,ik))
 
@@ -133,8 +134,99 @@ subroutine BE_dt_evolve_Houston_probe_decomp(iter,Act_t)
     zCt(:,:,ik) = matmul(zMat_diag(:,:),zvec_t(:,:))
 
   end do
-
 !!=== end the propagation (t => t + dt/2) ===
+
+
+!!=== start the propagation (t +dt/2 => t + dt) ===
+
+  Act_tmp = Ac_pump_BE(it+1)
+!== construct current matrix start
+  diff = 1d10
+  do iav = -NAmax,NAmax
+    if( abs(Act_tmp-dble(iav)*dAmax) < diff)then
+      diff = abs(Act_tmp-dble(iav)*dAmax)
+      iav_t = iav
+    end if
+  end do
+  if(iav_t == NAmax)iav_t=NAmax -1
+  if(iav_t == -NAmax)iav_t=-NAmax +1
+  if(abs(Act_tmp) > Amax)then
+    err_message='Amax is too small.'
+    call err_finalize
+  end if
+
+
+  xx = (Act_tmp-dble(iav_t)*dAmax)/dAmax
+  zH_tot(:,:,:) = 0.5d0*zV_NL(:,:,:,iav_t+1)*(xx**2+xx) &
+    +0.5d0*zV_NL(:,:,:,iav_t-1)*(xx**2-xx) &
+    +      zV_NL(:,:,:,iav_t)*(1d0 - xx**2)
+  zH_tot = zH_tot + zH_loc + zPi_loc*Act_tmp
+  do ib = 1,NB_basis
+    zH_tot(ib,ib,:) = zH_tot(ib,ib,:) + 0.5d0*Act_tmp**2
+  end do
+
+
+!== construct current matrix start
+  diff = 1d10
+  do iav = -NAmax,NAmax
+    if( abs(Act_tmp-dble(iav)*dAmax) < diff)then
+      diff = abs(Act_tmp-dble(iav)*dAmax)
+      iav_t = iav
+    end if
+  end do
+  if(iav_t == NAmax)iav_t=NAmax -1
+  if(iav_t == -NAmax)iav_t=-NAmax +1
+  if(abs(Act_tmp) > Amax)then
+    err_message='Amax is too small.'
+    call err_finalize
+  end if
+
+  xx = (Act_tmp-dble(iav_t)*dAmax)/dAmax
+  zPi_tot(:,:,:) = 0.5d0*zPi_NL(:,:,:,iav_t+1)*(xx**2+xx) &
+                  +0.5d0*zPi_NL(:,:,:,iav_t-1)*(xx**2-xx) &
+                  +      zPi_NL(:,:,:,iav_t)*(1d0 - xx**2)
+  zPi_tot = zPi_tot + zPi_loc
+  do ib = 1,NB_basis
+    zPi_tot(ib,ib,:) = zPi_tot(ib,ib,:) + Act_tmp
+  end do
+!== construct current matrix end
+
+  do ik = NK_s,NK_e
+    zMat_diag(:,:)=zH_tot(:,:,ik)
+    call zheev('V', 'U', NB_basis, zMat_diag, NB_basis, w, work_lp, lwork, rwork, info)
+    zdH_tot(:,:,ik) = matmul(zPi_tot(:,:,ik),zMat_diag(:,:))
+    zPi_tot(:,:,ik) = matmul(transpose(conjg(zMat_diag(:,:))),zdH_tot(:,:,ik))
+    zdH_tot(:,:,ik) = zPi_tot(:,:,ik)*Ac_probe_BE(it+1)
+
+    zvec_t(:,:) = matmul(transpose(conjg(zMat_diag(:,:))),zCt(:,:,ik))
+
+    ztCt_Lan = zvec_t
+    zfact = 1d0
+    do iexp = 1,4
+      zfact = zfact*(-zI*0.5d0*0.5d0*dt)/iexp
+      zACt_Lan(:,:) = matmul(zdH_tot(:,:,ik),ztCt_Lan(:,:))
+      zvec_t = zvec_t + zfact * zACt_Lan
+      ztCt_Lan = zACt_Lan
+    end do
+
+    do ib = 1,NB_TD
+      zvec_t(:,ib) = exp(-zI*w(:)*0.5d0*dt)*zvec_t(:,ib)
+    end do
+
+    ztCt_Lan = zvec_t
+    zfact = 1d0
+    do iexp = 1,4
+      zfact = zfact*(-zI*0.5d0*0.5d0*dt)/iexp
+      zACt_Lan(:,:) = matmul(zdH_tot(:,:,ik),ztCt_Lan(:,:))
+      zvec_t = zvec_t + zfact * zACt_Lan
+      ztCt_Lan = zACt_Lan
+    end do
+
+    zCt(:,:,ik) = matmul(zMat_diag(:,:),zvec_t(:,:))
+
+  end do
+!!=== end the propagation (t + dt/2 => t + dt) ===
+
 
 
   return

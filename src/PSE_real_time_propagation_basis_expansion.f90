@@ -43,7 +43,7 @@ subroutine PSE_real_time_propagation_basis_expansion
 !== Start dt_evolve
     if(switch_Houston_probe_decomposition)then
       Act_t = 0.5d0*( Actot_BE(iter+1) + Actot_BE(iter) )
-      call BE_dt_evolve_Houston_probe_decomp(iter,Act)
+      call BE_dt_evolve_Houston_probe_decomp(iter,Act_t)
     else
       Act_t = 0.5d0*( Actot_BE(iter+1) + Actot_BE(iter) )
       call BE_dt_evolve(Act_t)

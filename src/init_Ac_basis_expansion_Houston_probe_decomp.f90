@@ -23,7 +23,7 @@ subroutine init_Ac_basis_expansion_Houston_probe_decomp
   if(myrank == 0)write(*,"(A)")"== Start: Initialization of vector potential."
 
   allocate(Actot_BE(0:Nt+2),javt_BE(0:Nt+1))
-  allocate(Ac_pump_BE(0:Nt+2),Actot_probe_BE(0:Nt+2))
+  allocate(Ac_pump_BE(0:Nt+2),Ac_probe_BE(0:Nt+2))
 
   f0_1=5.338d-9*sqrt(IWcm2_1)      ! electric field in a.u.
   omega_1=omegaev_1/(2d0*Ry)  ! frequency in a.u.
