@@ -17,7 +17,7 @@
 ! Lvec: Lattice
 ! Rvec: Reciprocal lattice
 module PSE_variables
-
+  implicit none
 ! pseudopotential
   integer,parameter :: Nrmax=3000,Lmax=4
   character(2) :: ps_type

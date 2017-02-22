@@ -16,6 +16,7 @@
 subroutine BE_dt_evolve_Houston_probe_decomp(iter,Act_t)
   use global_variables
   use PSE_variables
+  implicit none
   integer,intent(in) :: iter
   real(8),intent(in) :: Act_t
   real(8),parameter :: eps_Act = 1d-6
@@ -48,7 +49,7 @@ subroutine BE_dt_evolve_Houston_probe_decomp(iter,Act_t)
 
 !!=== start the propagation (t => t + dt/2) ===
 
-  Act_tmp = Ac_pump_BE(it)
+  Act_tmp = Ac_pump_BE(iter)
 !== construct current matrix start
   diff = 1d10
   do iav = -NAmax,NAmax
@@ -105,7 +106,7 @@ subroutine BE_dt_evolve_Houston_probe_decomp(iter,Act_t)
     call zheev('V', 'U', NB_basis, zMat_diag, NB_basis, w, work_lp, lwork, rwork, info)
     zdH_tot(:,:,ik) = matmul(zPi_tot(:,:,ik),zMat_diag(:,:))
     zPi_tot(:,:,ik) = matmul(transpose(conjg(zMat_diag(:,:))),zdH_tot(:,:,ik))
-    zdH_tot(:,:,ik) = zPi_tot(:,:,ik)*Ac_probe_BE(it)
+    zdH_tot(:,:,ik) = zPi_tot(:,:,ik)*Ac_probe_BE(iter)
 
     zvec_t(:,:) = matmul(transpose(conjg(zMat_diag(:,:))),zCt(:,:,ik))
 
@@ -139,7 +140,7 @@ subroutine BE_dt_evolve_Houston_probe_decomp(iter,Act_t)
 
 !!=== start the propagation (t +dt/2 => t + dt) ===
 
-  Act_tmp = Ac_pump_BE(it+1)
+  Act_tmp = Ac_pump_BE(iter+1)
 !== construct current matrix start
   diff = 1d10
   do iav = -NAmax,NAmax
@@ -196,7 +197,7 @@ subroutine BE_dt_evolve_Houston_probe_decomp(iter,Act_t)
     call zheev('V', 'U', NB_basis, zMat_diag, NB_basis, w, work_lp, lwork, rwork, info)
     zdH_tot(:,:,ik) = matmul(zPi_tot(:,:,ik),zMat_diag(:,:))
     zPi_tot(:,:,ik) = matmul(transpose(conjg(zMat_diag(:,:))),zdH_tot(:,:,ik))
-    zdH_tot(:,:,ik) = zPi_tot(:,:,ik)*Ac_probe_BE(it+1)
+    zdH_tot(:,:,ik) = zPi_tot(:,:,ik)*Ac_probe_BE(iter+1)
 
     zvec_t(:,:) = matmul(transpose(conjg(zMat_diag(:,:))),zCt(:,:,ik))
 

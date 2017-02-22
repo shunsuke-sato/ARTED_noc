@@ -16,6 +16,7 @@
 subroutine BE_dt_evolve(Act_t)
   use global_variables
   use PSE_variables
+  implicit none
   real(8) :: Act_t
   real(8),parameter :: eps_Act = 1d-6
   integer :: iav, iav_t

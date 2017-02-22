@@ -17,6 +17,7 @@
 ! Lvec: Lattice
 ! Rvec: Reciprocal lattice
 module global_variables
+  implicit none
 !ARTED version
   character(50),parameter :: CODE_ver='crab.2014.09.13.0'
 
