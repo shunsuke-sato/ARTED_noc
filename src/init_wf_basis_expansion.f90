@@ -31,7 +31,7 @@ subroutine init_wf_basis_expansion
   allocate(zMat_diag(NB_basis,NB_basis))
   allocate(zC_eig(NB_basis,NB_basis,NK_s:NK_e))
 
-  allocate(zCt(NB_basis,NB_TD,NK_s:NK_e))
+  allocate(zCt(NB_basis,NB_TD,NK_s:NK_e),zCt_tmp(NB_basis,NB_TD,NK_s:NK_e))
   allocate(ztCt_tmp(NB_basis),zACt_tmp(NB_basis))
   allocate(zLanCt(NB_basis,NB_TD,NLanczos))
   allocate(ztCt_Lan(NB_basis,NB_TD),zACt_Lan(NB_basis,NB_TD))
