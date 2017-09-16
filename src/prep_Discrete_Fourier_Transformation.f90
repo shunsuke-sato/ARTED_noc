@@ -20,6 +20,7 @@ subroutine prep_Discrete_Fourier_Transformation
   real(8) :: an1,an2,an3
   real(8) :: k1(0:NL1-1),k2(0:NL2-1),k3(0:NL3-1),Bt(3,3)
   real(8) :: kx,ky,kz ! debug
+  real(8) :: k1_t,k2_t,k3_t
 
   an1=norm_a_Cvec(1)
   an2=norm_a_Cvec(2)
@@ -93,14 +94,21 @@ subroutine prep_Discrete_Fourier_Transformation
   do i=0,NL1-1
   do j=0,NL2-1
   do k=0,NL3-1
-    Lap_k(i,j,k)=-Bt(1,1)*k1(i)*k1(i)-Bt(1,2)*k1(i)*k2(j)-Bt(1,3)*k1(i)*k3(k) &
-                 -Bt(2,1)*k2(j)*k1(i)-Bt(2,2)*k2(j)*k2(j)-Bt(2,3)*k2(j)*k3(k) &
-                 -Bt(3,1)*k3(k)*k1(i)-Bt(3,2)*k3(k)*k2(j)-Bt(3,3)*k3(k)*k3(k) 
 
+    k1_t = k1(i)
+    k2_t = k2(j)
+    k3_t = k3(k)
+    if(i==NL1/2)k1_t = 0d0
+    if(j==NL2/2)k2_t = 0d0
+    if(k==NL3/2)k3_t = 0d0
 
-    Grad_x_zI(i,j,k)=-B_matrix(1,1)*k1(i)-B_matrix(2,1)*k2(j)-B_matrix(3,1)*k3(k)
-    Grad_y_zI(i,j,k)=-B_matrix(1,2)*k1(i)-B_matrix(2,2)*k2(j)-B_matrix(3,2)*k3(k)
-    Grad_z_zI(i,j,k)=-B_matrix(1,3)*k1(i)-B_matrix(2,3)*k2(j)-B_matrix(3,3)*k3(k)
+    Lap_k(i,j,k)=-Bt(1,1)*k1(i)*k1(i)-Bt(1,2)*k1_t*k2_t-Bt(1,3)*k1_t*k3_t &
+                 -Bt(2,1)*k2_t*k1_t-Bt(2,2)*k2(j)*k2(j)-Bt(2,3)*k2_t*k3_t &
+                 -Bt(3,1)*k3_t*k1_t-Bt(3,2)*k3_t*k2_t-Bt(3,3)*k3(k)*k3(k) 
+
+    Grad_x_zI(i,j,k)=-B_matrix(1,1)*k1_t-B_matrix(2,1)*k2_t-B_matrix(3,1)*k3_t
+    Grad_y_zI(i,j,k)=-B_matrix(1,2)*k1_t-B_matrix(2,2)*k2_t-B_matrix(3,2)*k3_t
+    Grad_z_zI(i,j,k)=-B_matrix(1,3)*k1_t-B_matrix(2,3)*k2_t-B_matrix(3,3)*k3_t
 
 !== debug
     if(myrank == 0)then
