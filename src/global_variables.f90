@@ -153,7 +153,7 @@ module global_variables
   real(8) :: Amax,dAmax
   real(8),allocatable :: Actot_BE(:),javt_BE(:)
 
-  complex(8),allocatable :: zCt(:,:,:),zACt_tmp(:),ztCt_tmp(:)
+  complex(8),allocatable :: zCt(:,:,:),zCt_tmp(:,:,:),zACt_tmp(:),ztCt_tmp(:)
   complex(8),allocatable :: zC_eig(:,:,:)
   integer,parameter :: NLanczos = 16
   complex(8),allocatable :: zLanCt(:,:,:),zACt_Lan(:,:),ztCt_Lan(:,:)

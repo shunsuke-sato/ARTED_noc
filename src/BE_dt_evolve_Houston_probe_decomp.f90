@@ -27,6 +27,7 @@ subroutine BE_dt_evolve_Houston_probe_decomp(iter,Act_t)
   complex(8) :: zfact
   real(8) :: Act_tmp,Act_probe_tmp
   complex(8) :: zvec_t(NB_basis,NB_TD)
+  integer :: ierr_lan
 !LAPACK
   integer :: lwork
   complex(8),allocatable :: work_lp(:)
@@ -133,7 +134,16 @@ subroutine BE_dt_evolve_Houston_probe_decomp(iter,Act_t)
     call BE_dt_half_evolve_Taylor
 !  call BE_dt_half_evolve_Lanczos
   else
-    call BE_dt_full_evolve_Lanczos
+    zCt_tmp = zCt
+    call BE_dt_full_evolve_Lanczos(ierr_lan)
+    if(ierr_lan /= 0)then
+      zCt = zCt_tmp
+      zdH_tot(:,:,:) = zH_tot(:,:,:) - (zH_loc(:,:,:) + zV_NL(:,:,:,0))
+      call BE_dt_half_evolve_Taylor
+      call BE_dt_evolve_Free
+      call BE_dt_half_evolve_Taylor
+
+    end if
   end if
 
   return
@@ -182,7 +192,7 @@ subroutine BE_dt_half_evolve_Taylor
 end subroutine BE_dt_half_evolve_Taylor
 
 
-subroutine BE_dt_full_evolve_Lanczos
+subroutine BE_dt_full_evolve_Lanczos(ierr_lan)
   use global_variables
   implicit none
   integer :: iLan
@@ -191,6 +201,7 @@ subroutine BE_dt_full_evolve_Lanczos
   complex(8),allocatable :: zvec(:)
   real(8) :: ss
   integer :: ik,ib
+  integer :: ierr_lan,ierr_lan_l
 !LAPACK ==
   integer :: lwork,Nmat
   real(8),allocatable :: work_lp(:),Amat(:,:)
@@ -198,7 +209,7 @@ subroutine BE_dt_full_evolve_Lanczos
   integer :: info
 !LAPACK ==
 
-
+  ierr_lan_l = 0
 
   K_point : do ik=NK_s,NK_e
 
@@ -236,6 +247,7 @@ subroutine BE_dt_full_evolve_Lanczos
       if(minval(beta(iLan+1,:)) < epsilon_Lan)then
         Nmat = iLan
         write(*,"(A,2x,3I7)")"Lanzcos break, Nmat,ik,myrank",Nmat,ik,myrank
+        ierr_lan_l = 1
         exit
       end if
       do ib=1,NB_TD
@@ -275,6 +287,9 @@ subroutine BE_dt_full_evolve_Lanczos
     end do
     
     deallocate(work_lp,rwork,w,Amat,zvec)
+
+    call MPI_ALLREDUCE(ierr_lan_l,ierr_lan,1,MPI_INTEGER,MPI_SUM,NEW_COMM_WORLD,ierr)      
+
     
   end do K_point
 end subroutine BE_dt_full_evolve_Lanczos
