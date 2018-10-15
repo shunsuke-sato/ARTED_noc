@@ -1,4 +1,4 @@
-'RT'                                ! calc_mode 'RT', 'BD' or 'GS'
+'multi_scale_basis'                                ! calc_mode 'RT', 'BD','GS', or 'multi_scale_basis'
 'N'                                 ! entrance_option 'N' or 'R'
 1d10                                ! Time_shoutdown (sec)
 'SiO2'                                ! SYSname
@@ -9,8 +9,8 @@
 -0.5  0.86602540378  0.0                       ! a_vec(:,2) : latice vector
 0.0  0.0  1.0                       ! a_vec(:,3) : latice vector
 9.2849d0  1.0  1.0  1.100094d0              ! aL,aL1,aL2,aL3
-20 20  48                            ! NL1,NL2,NL3
-4  4  4                             ! NK1,NK2,NK3
+10 10 10 !20 20  48                            ! NL1,NL2,NL3
+2  2  4                             ! NK1,NK2,NK3
 28  48                                ! NB,Nelec (# of bands, # of electrons)
 5  300                              ! Ncg ,Nscf (# of CG method,# of ground state iteration)
 2000  0.04  0                        ! Nt,dt,Npred_corr real-time parameter
