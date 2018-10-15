@@ -57,6 +57,7 @@ program main
 
   case('multi_scale_basis') ! multi-scale mode (with basis expansion)
     call MS_preparation
+    call MS_maxwell_kohn_sham_basis_expansion
 !    call PSE_read_matrix_elements
 !    call PSE_real_time_propagation_basis_expansion
   case default

@@ -13,24 +13,18 @@
 !  See the License for the specific language governing permissions and
 !  limitations under the License.
 !
-! Cvec: cartesian 
-! Lvec: Lattice
-! Rvec: Reciprocal lattice
-module ms_maxwell_ks_variables
+subroutine init_Ac_ms_basis_expansion
+  use global_variables
+  use ms_maxwell_ks_variables
   implicit none
-! grid
-  integer :: Nx_s, Nx_e
-  integer :: Mx
-  real(8) :: dx_m
+  integer :: iter
+  real(8) :: tt
+  real(8) :: f0_1,f0_2,omega_1,omega_2,tpulse_1,tpulse_2,T1_T2
 
-! parallelization
-  integer :: nprocs_per_Mpoint
-  integer :: macro_point_id
+  if(myrank == 0)write(*,"(A)")"== Start: Initialization of vector potential."
+  allocate(Ac_m(nx_s:nx_e), jt_m(Mx))
 
-! orbital
-  integer :: NK_s_m, NK_e_m
+  if(myrank == 0)write(*,"(A)")"== End: Initialization of vector potential."
 
-! electromagnetic fields
-  real(8),allocatable :: Ac_m(:), jt_m(:)
-
-end module ms_maxwell_ks_variables
+  return
+end subroutine init_Ac_ms_basis_expansion
