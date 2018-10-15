@@ -109,7 +109,7 @@ module global_variables
   real(8) :: Time_shoutdown
 
 ! control or/and I/O
-  character(2) :: calc_mode
+  character(64) :: calc_mode
   character(200) :: err_message
   character(50) :: SYSname
   character(1) :: option_TD_band_dos
