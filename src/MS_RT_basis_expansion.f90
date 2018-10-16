@@ -25,7 +25,6 @@ subroutine MS_RT_basis_expansion
 
   call init_wf_basis_expansion
   call init_Ac_ms_basis_expansion
-  Ac_m_o = Ac_m
 
   call MS_current(jt_m,Ac_m)
   if(myrank == 0)open(30,file='Ac_vac_rear.out')
