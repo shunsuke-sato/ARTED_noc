@@ -25,8 +25,8 @@ subroutine MS_preparation
 ! Parameter for maxwell-kohn-sham
   Nx_s = -2000
   Nx_e =  2000
-  Mx = 4
-  dx_m = 40d-9/0.529177d-10
+  Mx = 160
+  dx_m = 40d-9/0.529177d-10/Mx
 
   if(mod(Nprocs,Mx) /=0)stop 'Error Mx is not dividable by Nprocs'
 

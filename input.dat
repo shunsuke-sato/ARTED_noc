@@ -13,7 +13,7 @@
 2  2  4                             ! NK1,NK2,NK3
 28  48                                ! NB,Nelec (# of bands, # of electrons)
 5  300                              ! Ncg ,Nscf (# of CG method,# of ground state iteration)
-2000  0.04  0                        ! Nt,dt,Npred_corr real-time parameter
+30000  0.04  0                        ! Nt,dt,Npred_corr real-time parameter
 'N'  600                             ! option_TD_band_dos, Nstep_TD_band_dos ('Y' or 'N')
 'N'                                 ! option_IP ('Y' or 'N')
 0.001                               ! dAc (initial distortion in response)
