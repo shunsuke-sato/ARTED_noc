@@ -9,7 +9,7 @@
 -0.5  0.86602540378  0.0                       ! a_vec(:,2) : latice vector
 0.0  0.0  1.0                       ! a_vec(:,3) : latice vector
 9.2849d0  1.0  1.0  1.100094d0              ! aL,aL1,aL2,aL3
-10 10 10 !20 20  48                            ! NL1,NL2,NL3
+20 20 20 !20 20  48                            ! NL1,NL2,NL3
 2  2  4                             ! NK1,NK2,NK3
 28  48                                ! NB,Nelec (# of bands, # of electrons)
 5  300                              ! Ncg ,Nscf (# of CG method,# of ground state iteration)
