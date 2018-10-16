@@ -26,7 +26,7 @@ subroutine MS_preparation
   Mx = 64
   dx_m = 40d-9/0.529177d-10/Mx
   Nx_s = -(10d-6/0.529177d-10)/dx_m
-  Nx_s = +(10d-6/0.529177d-10)/dx_m
+  Nx_e = +(10d-6/0.529177d-10)/dx_m
 
 
   if(mod(Nprocs,Mx) /=0)stop 'Error Mx is not dividable by Nprocs'
