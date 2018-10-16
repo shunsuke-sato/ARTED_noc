@@ -22,6 +22,7 @@ module ms_maxwell_ks_variables
   integer :: Nx_s, Nx_e
   integer :: Mx
   real(8) :: dx_m
+  real(8),allocatable :: x_m(:)
 
 ! parallelization
   integer :: nprocs_per_Mpoint
@@ -33,5 +34,7 @@ module ms_maxwell_ks_variables
 ! electromagnetic fields
   real(8),allocatable :: Ac_m(:), jt_m(:)
   real(8),allocatable :: Ac_m_n(:),Ac_m_o(:)
+
+
 
 end module ms_maxwell_ks_variables

@@ -17,18 +17,18 @@ subroutine dt_evolve_macro_field
   use global_variables
   use ms_maxwell_ks_variables
   implicit none
-  real(8) :: lap0, lap1
+  real(8) :: clap0, clap1
   real(8) :: Lap_Ac(nx_s:nx_e)
   integer :: ix
 
-  lap0 = -2d0/dx_m**2
-  lap1 = 1d0/dx_m**2
+  clap0 = -2d0/dx_m**2
+  clap1 = 1d0/dx_m**2
 
-  Lap_Ac(nx_s) = lap0*Ac_m(nx_s) + lap1Ac_m(nx_s+1)
+  Lap_Ac(nx_s) = clap0*Ac_m(nx_s) + clap1*Ac_m(nx_s+1)
   do ix = nx_s+1,nx_e-1
-    Lap_Ac(ix) = lap0*Ac_m(ix) + lap1*(Ac_m(ix+1)+Ac_m(ix-1))
+    Lap_Ac(ix) = clap0*Ac_m(ix) + clap1*(Ac_m(ix+1)+Ac_m(ix-1))
   end do
-  Lap_Ac(nx_e) = lap0*Ac_m(nx_e) + lap1*Ac_m(nx_e-1)
+  Lap_Ac(nx_e) = clap0*Ac_m(nx_e) + clap1*Ac_m(nx_e-1)
 
   Ac_m_n = 2d0*Ac_m - Ac_m_o + (dt*clight)**2*Lap_Ac
   Ac_m_n(1:Mx) = Ac_m_n(1:Mx) -4d0*pi*dt**2*jt_m(1:Mx)
