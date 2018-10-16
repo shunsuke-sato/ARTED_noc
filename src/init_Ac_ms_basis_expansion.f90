@@ -23,6 +23,7 @@ subroutine init_Ac_ms_basis_expansion
 
   if(myrank == 0)write(*,"(A)")"== Start: Initialization of vector potential."
   allocate(Ac_m(nx_s:nx_e), jt_m(Mx))
+  allocate(Ac_m_n(nx_s:nx_e),Ac_m_o(nx_s:nx_e))
 
   if(myrank == 0)write(*,"(A)")"== End: Initialization of vector potential."
 

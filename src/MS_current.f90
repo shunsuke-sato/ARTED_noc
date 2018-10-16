@@ -29,6 +29,7 @@ subroutine MS_current(jt_m_out,Ac_m_in)
 
 
   Act_t = Ac_m_in(macro_point_id)
+  jt_m_l = 0d0
   
 !  kAc_Cvec(1,:)=kAc0_Cvec(1,:)+Act_t*Epdir_1(1)
 !  kAc_Cvec(2,:)=kAc0_Cvec(2,:)+Act_t*Epdir_1(2)
