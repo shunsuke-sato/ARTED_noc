@@ -46,7 +46,7 @@ subroutine MS_RT_basis_expansion
     call dt_evolve_macro_field
 
     Act_t = 0.5d0*(Ac_m_n(macro_point_id) + Ac_m(macro_point_id))
-    call BE_dt_evolve(Act_t)
+    call BE_dt_evolve_for_MS(Act_t)
 
     call MS_current(jt_m,Ac_m_n)
 
