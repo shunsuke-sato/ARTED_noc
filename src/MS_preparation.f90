@@ -42,7 +42,7 @@ subroutine MS_preparation
   write(*,*)"myrak, macro_point_id",myrank,macro_point_id
 
 
-  NK_ave=NK/Nprocs; NK_remainder=mod(NK,Nprocs)
+  NK_ave=NK/Nprocs_per_Mpoint; NK_remainder=mod(NK,Nprocs_per_Mpoint)
   if(Myrank < NK_remainder)then
     NK_s=(NK_ave+1)*Myrank+1
     NK_e=(NK_ave+1)*Myrank+(NK_ave+1)
