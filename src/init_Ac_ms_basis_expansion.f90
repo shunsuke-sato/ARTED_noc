@@ -32,6 +32,7 @@ subroutine init_Ac_ms_basis_expansion
 
 
   Ac_m = 0d0
+  Ac_m_o = 0d0
 
   f0_1=5.338d-9*sqrt(IWcm2_1)      ! electric field in a.u.
   omega_1=omegaev_1/(2d0*Ry)  ! frequency in a.u.
