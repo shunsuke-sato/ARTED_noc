@@ -172,8 +172,11 @@ subroutine PSE_preparation_matrix
     end do
   end do
 
+  if(myrank == 0)CALL execute_command_line('mkdir "matrix_element"')
+  call mpi_barrier(MPI_COMM_WORLD,ierr)
+
   if(myrank == 0)then
-    open(200,file="basis_exp_basic.out",form='unformatted')
+    open(200,file="matrix_element/basis_exp_basic.out",form='unformatted')
     write(200)NB_basis
     write(200)Amax,dAmax
     write(200)Epdir_1
@@ -182,7 +185,7 @@ subroutine PSE_preparation_matrix
 
   do ik = NK_s,NK_e
     write(cik,"(I9.9)")ik
-    filename=trim(cik)//"_matrix_elements.out"
+    filename="matrix_element/"//trim(cik)//"_matrix_elements.out"
     open(201,file=filename,form='unformatted')
     write(201)zH_loc(:,:,ik)
     write(201)zPi_loc(:,:,ik)

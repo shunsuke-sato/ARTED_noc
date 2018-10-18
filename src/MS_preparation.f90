@@ -57,7 +57,7 @@ subroutine MS_preparation
 
 
   if(myrank == 0)then
-    open(200,file="basis_exp_basic.out",form='unformatted')
+    open(200,file="matrix_element/basis_exp_basic.out",form='unformatted')
     read(200)NB_basis
     read(200)Amax,dAmax
     read(200)Epdir_1
@@ -85,7 +85,7 @@ subroutine MS_preparation
   allocate(H0_eigval(NB_basis,NK_s:NK_e))
   do ik = NK_s,NK_e
     write(cik,"(I9.9)")ik
-    filename=trim(cik)//"_matrix_elements.out"
+    filename="matrix_element"//trim(cik)//"_matrix_elements.out"
     open(201,file=filename,form='unformatted')
     read(201)zH_loc(:,:,ik)
     read(201)zPi_loc(:,:,ik)
