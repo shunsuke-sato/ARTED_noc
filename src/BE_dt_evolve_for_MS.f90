@@ -68,10 +68,10 @@ subroutine BE_dt_evolve_for_MS(Act_t)
         do iexp = 1, nexp_taylor
           zfact = zfact*(-zI*dt)/iexp
 !          zhvec0(1:NB_basis, 1:NB_TD) = matmul(&
-!            zdH_tot(1:NB_basis,1:NB_basis,ik),&
+!            zH_tot(1:NB_basis,1:NB_basis,ik),&
 !            zvec0(1:NB_TD))
           call zhemm('L', 'U', NB_basis, NB_TD, 1d0, &
-            zdH_tot(1:NB_basis,1:NB_basis,ik), &
+            zH_tot(1:NB_basis,1:NB_basis,ik), &
             NB_basis,&
             zvec0(1:NB_basis,1:NB_TD), &
             NB_basis, 0d0, &
