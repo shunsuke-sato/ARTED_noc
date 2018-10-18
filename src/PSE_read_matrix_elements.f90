@@ -49,7 +49,7 @@ subroutine PSE_read_matrix_elements
   allocate(H0_eigval(NB_basis,NK_s:NK_e))
   do ik = NK_s,NK_e
     write(cik,"(I9.9)")ik
-    filename="matrix_element"//trim(cik)//"_matrix_elements.out"
+    filename="matrix_element/"//trim(cik)//"_matrix_elements.out"
     open(201,file=filename,form='unformatted')
     read(201)zH_loc(:,:,ik)
     read(201)zPi_loc(:,:,ik)
