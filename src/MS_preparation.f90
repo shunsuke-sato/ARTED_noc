@@ -18,7 +18,7 @@ subroutine MS_preparation
   use ms_maxwell_ks_variables
   implicit none
   integer :: ix
-  integer :: ik
+  integer :: ik, irank_m, i
   character(50) :: cik, filename
 
   write(*,*)myrank
@@ -35,20 +35,21 @@ subroutine MS_preparation
   do ix = 1, Mx
     if(nprocs_per_Mpoint*ix > myrank)then
       macro_point_id = ix
+      irank_m = myrank - nprocs_per_Mpoint*(ix-1)
       exit
     end if
   end do
 
-  write(*,*)"myrak, macro_point_id",myrank,macro_point_id
+  write(*,*)"myrak, macro_point_id,irank",myrank,macro_point_id,irank_m
 
 
   NK_ave=NK/Nprocs_per_Mpoint; NK_remainder=mod(NK,Nprocs_per_Mpoint)
-  if(Myrank < NK_remainder)then
-    NK_s=(NK_ave+1)*Myrank+1
-    NK_e=(NK_ave+1)*Myrank+(NK_ave+1)
-  else if(Myrank >= NK_remainder)then
-    NK_s=(Myrank-NK_remainder)*NK_ave+(NK_ave+1)*NK_remainder+1
-    NK_e=(Myrank-NK_remainder)*NK_ave+(NK_ave+1)*NK_remainder+NK_ave
+  if(irank_m < NK_remainder)then
+    NK_s=(NK_ave+1)*irank_m+1
+    NK_e=(NK_ave+1)*irank_m+(NK_ave+1)
+  else if(irank_m >= NK_remainder)then
+    NK_s=(irank_m-NK_remainder)*NK_ave+(NK_ave+1)*NK_remainder+1
+    NK_e=(irank_m-NK_remainder)*NK_ave+(NK_ave+1)*NK_remainder+NK_ave
   end if
 
   if(Myrank == 0)write(*,'(A)')'NK-split is completed'
