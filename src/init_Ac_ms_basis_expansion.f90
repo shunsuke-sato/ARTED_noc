@@ -112,6 +112,39 @@ subroutine init_Ac_ms_basis_expansion
 
 
     end do
+  case('puls_tr')
+! pump
+    do ix = nx_s, nx_e
+
+!t=0
+      tt = 0d0 -x_m(ix)/clight-0.5d0*tpulse_1
+      if(abs(tt)<0.5d0*tpulse_1)then
+        Ac_m(ix) = -f0_1/omega_1*cos(pi*tt/tpulse_1)**4*sin(omega_1*tt)
+      end if
+
+!t=-dt
+      tt = -dt -x_m(ix)/clight-0.5d0*tpulse_1
+      if(abs(tt)<0.5d0*tpulse_1)then
+        Ac_m_o(ix) = -f0_1/omega_1*cos(pi*tt/tpulse_1)**4*sin(omega_1*tt)
+      end if
+
+    end do
+! pump
+    do ix = nx_s, nx_e
+
+!t=0
+      tt = 0d0 -x_m(ix)/clight-0.5d0*tpulse_1 - T1_T2
+      if(abs(tt)<0.5d0*tpulse_2)then
+        Ac_m(ix) = Ac_m(ix) -f0_2/omega_2*cos(pi*tt/tpulse_2)**2*cos(omega_1*tt)**8*sin(omega_2*tt)
+      end if
+
+      tt = -dt -x_m(ix)/clight-0.5d0*tpulse_1 - T1_T2
+      if(abs(tt)<0.5d0*tpulse_2)then
+        Ac_m_o(ix) = Ac_m_o(ix) -f0_2/omega_2*cos(pi*tt/tpulse_2)**2*cos(omega_1*tt)**8*sin(omega_2*tt)
+      end if
+
+
+    end do
   case default
     err_message='error in init_Ac'
     call err_finalize
