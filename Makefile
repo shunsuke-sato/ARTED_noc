@@ -25,7 +25,7 @@ OBJ_dir = $(addprefix object/,$(OBJ))
 
 PROG = ARTED_noc
 
-$(PROG):global_variables.o PSE_variables.o main.o PSE_band_calc_variables.o $(OBJ)
+$(PROG):global_variables.o PSE_variables.o main.o PSE_band_calc_variables.o ms_maxwell_ks_variables.o $(OBJ)
 	$(FC) -o $(PROG) $(OBJ_dir) $(LN)
 
 main.o:main.f90

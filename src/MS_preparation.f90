@@ -13,13 +13,49 @@
 !  See the License for the specific language governing permissions and
 !  limitations under the License.
 !
-subroutine PSE_read_matrix_elements
+subroutine MS_preparation
   use global_variables
+  use ms_maxwell_ks_variables
   implicit none
-  integer :: ik
+  integer :: ix
+  integer :: ik, irank_m, i
   character(50) :: cik, filename
 
-  if(myrank == 0)write(*,"(A)")"== Start reading matrix elements."
+  write(*,*)myrank
+! Parameter for maxwell-kohn-sham
+  Mx = 64
+  dx_m = 40d-9/0.529177d-10/Mx
+  Nx_s = -(10d-6/0.529177d-10)/dx_m
+  Nx_e = +(10d-6/0.529177d-10)/dx_m
+
+
+  if(mod(Nprocs,Mx) /=0)stop 'Error Mx is not dividable by Nprocs'
+
+  nprocs_per_Mpoint = Nprocs/Mx
+  do ix = 1, Mx
+    if(nprocs_per_Mpoint*ix > myrank)then
+      macro_point_id = ix
+      irank_m = myrank - nprocs_per_Mpoint*(ix-1)
+      exit
+    end if
+  end do
+
+  write(*,*)"myrak, macro_point_id,irank",myrank,macro_point_id,irank_m
+
+
+  NK_ave=NK/Nprocs_per_Mpoint; NK_remainder=mod(NK,Nprocs_per_Mpoint)
+  if(irank_m < NK_remainder)then
+    NK_s=(NK_ave+1)*irank_m+1
+    NK_e=(NK_ave+1)*irank_m+(NK_ave+1)
+  else if(irank_m >= NK_remainder)then
+    NK_s=(irank_m-NK_remainder)*NK_ave+(NK_ave+1)*NK_remainder+1
+    NK_e=(irank_m-NK_remainder)*NK_ave+(NK_ave+1)*NK_remainder+NK_ave
+  end if
+
+  if(Myrank == 0)write(*,'(A)')'NK-split is completed'
+  if(Myrank == 0)write(*,'(2(A,2x,I0,2x))')'NK_ave =',NK_ave,'NK_remainder =',NK_remainder
+
+
   if(myrank == 0)then
     open(200,file="matrix_element/basis_exp_basic.out",form='unformatted')
     read(200)NB_basis
@@ -59,5 +95,6 @@ subroutine PSE_read_matrix_elements
   end do
 
   if(myrank == 0)write(*,"(A)")"== End reading matrix elements."
-  return
-end subroutine PSE_read_matrix_elements
+
+
+end subroutine MS_preparation

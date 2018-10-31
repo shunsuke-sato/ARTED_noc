@@ -25,7 +25,9 @@ module global_variables
   real(8),parameter :: Pi=3.141592653589793d0
   complex(8),parameter :: zI=(0.d0,1.d0)
   real(8),parameter :: a_B=0.529177d0,Ry=13.6058d0
+  real(8),parameter :: clight = 137.035999139d0
   real(8),parameter :: umass=1822.9d0
+
 
 ! DFT parameters
   character(10) :: cEex_Cor
@@ -109,7 +111,7 @@ module global_variables
   real(8) :: Time_shoutdown
 
 ! control or/and I/O
-  character(2) :: calc_mode
+  character(64) :: calc_mode
   character(200) :: err_message
   character(50) :: SYSname
   character(1) :: option_TD_band_dos

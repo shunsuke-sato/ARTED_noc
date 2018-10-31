@@ -43,7 +43,7 @@ subroutine preparation
     write(*,'(A,2x,A)')'entrance_option = ',entrance_option
   end if
 
-  call MPI_BCAST(calc_mode,2,MPI_CHARACTER,0,MPI_COMM_WORLD,ierr)
+  call MPI_BCAST(calc_mode,64,MPI_CHARACTER,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(entrance_option,1,MPI_CHARACTER,0,MPI_COMM_WORLD,ierr)
 
   if(entrance_option == 'N')then
