@@ -2,7 +2,7 @@
 'N'                                 ! entrance_option 'N' or 'R'
 1d10                                ! Time_shoutdown (sec)
 'GaN'                                ! SYSname
-'PZM'  1.00d0                     ! 
+'PZ'  1.00d0                     ! 
 'ABINITFHI'                             ! ps_format
 'PSE'  'FT'                         ! method 'PAW' or 'PSE' or 'CHK', type_spatial_difference = 'FD' or 'FT'
 1.0  0.0  0.0                       ! a_vec(:,1) : latice vector
@@ -10,7 +10,7 @@
 0.0  0.0  1.0                       ! a_vec(:,3) : latice vector
 5.94507839069d0  1.0  1.0  1.629d0  ! PRB 48, 7897 (1993)), aL,aL1,aL2,aL3,
 24 24 38 !20 20  48                            ! NL1,NL2,NL3
-8  8  8                             ! NK1,NK2,NK3
+4  4  4                             ! NK1,NK2,NK3
 28  36                                ! NB,Nelec (# of bands, # of electrons)
 5  300                              ! Ncg ,Nscf (# of CG method,# of ground state iteration)
 30000  0.04  0                        ! Nt,dt,Npred_corr real-time parameter
@@ -23,7 +23,7 @@
 1d10  0.5   30d0  .0                ! IWcm2_2, tpulsefs_2(fs), omegaev_2(eV), phi_CEP_2(2pi) :laser
 0. 0. 1.                            ! Epdir_2 (Cartesian component of Ac)
 0.0d0                                ! T1_T2fs(fs)
-9  2                                ! NI,NE
+4  2                                ! NI,NE
 31  7                               ! Zatom(j),j=1,NE
 1	0.0 0.0 0.0	1   ! label, Rx, Ry, Rz, Kion
 2	0.0	0.0 0.377	2   ! ion coordinate in unit of aL
