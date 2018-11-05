@@ -30,13 +30,13 @@ subroutine PSE_preparation_basis_set
   if(myrank == 0)write(*,*)'charge =',sum(rho_c)*H123,sum(rho_e)*H123,sum(rho_p)*H123  
 
   NK_shift = 4
-  NB_basis_main = 28
-  NB_basis_shift = 24
+  NB_basis_main = 24
+  NB_basis_shift = 18+6
   NB_basis = NB_basis_main + NK_shift*NB_basis_shift
   allocate(kshift(3,NK_shift))
-  kshift(1,1)=0d0; kshift(2,1)=0d0; kshift(3,1)=0.5d0*5.338d-9*sqrt(1d13)/(1.55d0/(2d0*Ry))
+  kshift(1,1)=0.5d0*5.338d-9*sqrt(1d10)/(1.55d0/(2d0*Ry)); kshift(2,1)=0d0; kshift(3,1)=0d0
   kshift(:,2)=-kshift(:,1)
-  kshift(1,3)=0d0; kshift(2,3)=0d0; kshift(3,3)=5.338d-9*sqrt(1d13)/(1.55d0/(2d0*Ry))
+  kshift(1,3)=5.338d-9*sqrt(1d10)/(1.55d0/(2d0*Ry)); kshift(2,3)=0d0; kshift(3,3)=0d0
   kshift(:,4)=-kshift(:,3)
   if(NB < max(NB_basis_main,NB_basis_shift))stop "NB is too small."
   allocate(zu_basis(NL,NB_basis,NK_s:NK_e))
