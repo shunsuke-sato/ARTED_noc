@@ -17,7 +17,7 @@ subroutine init_Ac_basis_expansion
   use global_variables
   implicit none
   integer :: iter
-  real(8) :: tt
+  real(8) :: tt,xx
   real(8) :: f0_1,f0_2,omega_1,omega_2,tpulse_1,tpulse_2,T1_T2
 
   if(myrank == 0)write(*,"(A)")"== Start: Initialization of vector potential."
@@ -43,16 +43,18 @@ subroutine init_Ac_basis_expansion
 ! pump laser
     do iter=0,Nt+2
       tt=iter*dt
-      if (tt<tpulse_1) then
-        Actot_BE(iter)=-f0_1/omega_1*(cos(pi*(tt-0.5d0*tpulse_1)/tpulse_1))**2*sin(omega_1*(tt-0.5d0*tpulse_1)+phi_CEP_1*2d0*pi)
+      xx = tt - 0.5d0*tpulse_1
+      if (abs(xx)<0.5d0*tpulse_1) then
+        Actot_BE(iter)=-f0_1/omega_1*(cos(pi*xx/tpulse_1))**2*sin(omega_1*xx)
       end if
     enddo
 ! probe laser
     do iter=0,Nt+2
       tt=iter*dt
-      if ( (tt>0.5d0*(tpulse_1-tpulse_2)+T1_T2) .and. (tt>0.5d0*(tpulse_1-tpulse_2)+T1_T2+tpulse_2) ) then
+      xx = tt - 0.5d0*tpulse_1 - T1_T2
+      if (abs(xx)<0.5d0*tpulse_2) then
         Actot_BE(iter)=Actot_BE(iter) &
-          &-f0_2/omega_2*(cos(pi*(tt-(0.5d0*tpulse_1+T1_T2))/tpulse_2))**2*sin(omega_2*(tt-(0.5d0*tpulse_1+T1_T2))+phi_CEP_2*2d0*pi)
+          &-f0_2/omega_2*(cos(pi*xx/tpulse_2))**2*sin(omega_2*xx+phi_CEP_2*2d0*pi)
       endif
     enddo
   case('cos4cos')
