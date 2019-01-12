@@ -1,4 +1,4 @@
-'MS'                                ! calc_mode 'RT', 'BD','GS', or 'multi_scale_basis'
+'BD'                                ! calc_mode 'RT', 'BD','GS', or 'multi_scale_basis'
 'N'                                 ! entrance_option 'N' or 'R'
 1d10                                ! Time_shoutdown (sec)
 'AlAs'                                ! SYSname
@@ -8,7 +8,7 @@
 0.0  1.0  1.0                       ! a_vec(:,1) : latice vector
 1.0  0.0  1.0                       ! a_vec(:,2) : latice vector
 1.0  1.0  0.0                       ! a_vec(:,3) : latice vector
-10.6984765894d0  1.0  1.0  1.0d0  ! Ref. Semiconductors, Data handbook, aL,aL1,aL2,aL3,
+10.6984765894d0  0.5  0.5  0.5d0  ! Ref. Semiconductors, Data handbook, aL,aL1,aL2,aL3,
 16 16 16 !20 20  48                            ! NL1,NL2,NL3
 4  4  4                             ! NK1,NK2,NK3
 16  18                                ! NB,Nelec (# of bands, # of electrons)
@@ -24,7 +24,7 @@
 1. 0. 0.                            ! Epdir_2 (Cartesian component of Ac)
 0.0d0                                ! T1_T2fs(fs)
 2  2                                ! NI,NE
-31  33                                  ! Zatom(j),j=1,NE
+13  33                                  ! Zatom(j),j=1,NE
 1    .0       .0       .0      1    ! label, Rx, Ry, Rz, Kion
 2    .25      .25      .25     2    ! ion coordinate in unit of aL
-2  2                                  ! Lref(j),j=1,NE
+0  1                                  ! Lref(j),j=1,NE
