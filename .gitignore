@@ -1,7 +1,6 @@
 # Log files
 *.out
 *.log
-*.dat
 *~
 
 # Object files
