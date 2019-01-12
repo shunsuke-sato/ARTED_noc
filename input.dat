@@ -1,17 +1,17 @@
-'BD'                                ! calc_mode 'RT', 'BD','GS', or 'multi_scale_basis'
+'GS'                                ! calc_mode 'RT', 'BD','GS', or 'multi_scale_basis'
 'N'                                 ! entrance_option 'N' or 'R'
 1d10                                ! Time_shoutdown (sec)
 'AlAs'                                ! SYSname
 'TBmBJ'  1.00d0                     ! 
 'ABINITFHI'                             ! ps_format
 'PSE'  'FT'                         ! method 'PAW' or 'PSE' or 'CHK', type_spatial_difference = 'FD' or 'FT'
-0.0  1.0  1.0                       ! a_vec(:,1) : latice vector
-1.0  0.0  1.0                       ! a_vec(:,2) : latice vector
-1.0  1.0  0.0                       ! a_vec(:,3) : latice vector
-10.6984765894d0  0.5  0.5  0.5d0  ! Ref. Semiconductors, Data handbook, aL,aL1,aL2,aL3,
+1.0  0.0  0.0                       ! a_vec(:,1) : latice vector
+0.0  1.0  0.0                       ! a_vec(:,2) : latice vector
+0.0  0.0  1.0                       ! a_vec(:,3) : latice vector
+8.73998333024d0  1.0  1.0  0.65989189189d0  ! Ref. Semiconductors, Data handbook, aL,aL1,aL2,aL3,
 16 16 16 !20 20  48                            ! NL1,NL2,NL3
 4  4  4                             ! NK1,NK2,NK3
-16  18                                ! NB,Nelec (# of bands, # of electrons)
+30  48                                ! NB,Nelec (# of bands, # of electrons)
 5  300                              ! Ncg ,Nscf (# of CG method,# of ground state iteration)
 30000  0.04  0                        ! Nt,dt,Npred_corr real-time parameter
 'N'  600                             ! option_TD_band_dos, Nstep_TD_band_dos ('Y' or 'N')
@@ -24,7 +24,11 @@
 1. 0. 0.                            ! Epdir_2 (Cartesian component of Ac)
 0.0d0                                ! T1_T2fs(fs)
 2  2                                ! NI,NE
-13  33                                  ! Zatom(j),j=1,NE
+12  9                                  ! Zatom(j),j=1,NE
 1    .0       .0       .0      1    ! label, Rx, Ry, Rz, Kion
-2    .25      .25      .25     2    ! ion coordinate in unit of aL
-0  1                                  ! Lref(j),j=1,NE
+2    .5       .5       .5      1    ! ion coordinate in unit of aL
+3    .303     .303     .0      2    ! ion coordinate in unit of aL
+4    .697     .697     .0      2    ! ion coordinate in unit of aL
+5    .803     .197     .5      2    ! ion coordinate in unit of aL
+6    .197     .803     .5      2    ! ion coordinate in unit of aL
+0  2                                  ! Lref(j),j=1,NE
