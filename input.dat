@@ -17,10 +17,10 @@
 'N'  600                             ! option_TD_band_dos, Nstep_TD_band_dos ('Y' or 'N')
 'N'                                 ! option_IP ('Y' or 'N')
 0.001                               ! dAc (initial distortion in response)
-'cos4cos'  'Tr'                          ! laser_type 'cos2cos', 'cos4cos' or 'impulse',  Tr_Lo 'Tr' or 'Lo'
-2d10  20.0  1.55  .0                ! IWcm2_1, tpulsefs_1(fs), omegaev_1(eV), phi_CEP_1(2pi) :laser
+'Acos2_4'  'Tr'                          ! laser_type 'cos2cos', 'cos4cos' or 'impulse',  Tr_Lo 'Tr' or 'Lo'
+5d12  20.0  1.55  .0                ! IWcm2_1, tpulsefs_1(fs), omegaev_1(eV), phi_CEP_1(2pi) :laser
 1. 0. 0.                            ! Epdir_1 (Cartesian component of Ac)
-1d10  0.5   21d0  .0                ! IWcm2_2, tpulsefs_2(fs), omegaev_2(eV), phi_CEP_2(2pi) :laser
+1d10  1d0   40d0  .0                ! IWcm2_2, tpulsefs_2(fs), omegaev_2(eV), phi_CEP_2(2pi) :laser
 1. 0. 0.                            ! Epdir_2 (Cartesian component of Ac)
 0.0d0                                ! T1_T2fs(fs)
 2  1                                ! NI,NE
