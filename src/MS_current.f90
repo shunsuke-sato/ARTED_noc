@@ -26,7 +26,7 @@ subroutine MS_current(jt_m_out,Ac_m_in)
   integer :: iav, iav_t
   real(8) :: diff,xx
   integer :: ik,ib
-
+  complex(8) :: zvec0(NB_basis, NB_TD)
 
   Act_t = Ac_m_in(macro_point_id)
   jt_m_l = 0d0
@@ -61,13 +61,13 @@ subroutine MS_current(jt_m_out,Ac_m_in)
 !== construct current matrix end
 
   jav_l = 0d0
+  !$omp parallel do private(ik, ib, zvec0) reduction(+:jav_l)
   K_point : do ik=NK_s,NK_e
-  Band : do ib=1,NB_TD
 
-    zACt_tmp(:) = matmul(zPi_tot(:,:,ik),zCt(:,ib,ik))
-    jav_l = jav_l + occ(ib,ik)*sum(conjg(zCt(:,ib,ik))*zACt_tmp(:))
-
-  end do Band
+    zvec0(1:NB_basis, 1:NB_TD) = matmul(zPi_tot(:,:,ik),zCt(:,1:NB_TD,ik))
+    Band : do ib=1,NB_TD
+      jav_l = jav_l + occ(ib,ik)*sum(conjg(zCt(:,ib,ik))*zvec0(:, ib))
+    end do Band
   end do K_point
 
   jav_l=jav_l/Vcell

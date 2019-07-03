@@ -60,7 +60,7 @@ subroutine BE_dt_evolve_for_MS(Act_t)
       complex(8) :: zvec0(NB_basis, NB_TD)
       complex(8) :: zhvec0(NB_basis, NB_TD)
       
-
+!$omp parallel do private(ik, iexp, zfact, zvec0, zhvec0)
       K_point : do ik=NK_s,NK_e
 
         zfact = 1d0
