@@ -22,6 +22,10 @@ subroutine MS_preparation
   character(50) :: cik, filename
 
   write(*,*)myrank
+
+  call init_grid
+  deallocate(Lx, iLx, iLx123)
+
 ! Parameter for maxwell-kohn-sham
   Mx = 224
   dx_m = 50d-9/0.529177d-10/Mx
