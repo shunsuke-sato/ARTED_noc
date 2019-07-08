@@ -17,13 +17,18 @@ subroutine MS_RT_basis_expansion
   use global_variables
   use ms_maxwell_ks_variables
   implicit none
-  integer :: iter,iter_t,ix
+  integer :: iter,iter_t,ix, ix_m
   real(8) :: jav,Act_t
   character(64) :: cit, cfilename
 
   if(myrank == 0)write(*,"(A)")"== Start real-time propagation with basis expansion."
 
   call init_wf_basis_expansion
+  allocate(zCt_Mpoint(NB_basis,NB_TD,NK_s:NK_e,Mx_s:Mx_e))
+  do ix_m = Mx_s, Mx_e
+    zCt_Mpoint(NB_basis,NB_TD,NK_s:NK_e,ix_m) = zCt(NB_basis,NB_TD,NK_s:NK_e)
+  end do
+  
   call init_Ac_ms_basis_expansion
 
   call MS_current(jt_m,Ac_m)

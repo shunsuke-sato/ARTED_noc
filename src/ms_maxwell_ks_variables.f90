@@ -37,7 +37,8 @@ module ms_maxwell_ks_variables
   real(8),allocatable :: Ac_m(:), jt_m(:)
   real(8),allocatable :: Ac_m_n(:),Ac_m_o(:)
 
-
+! wavefunction
+  complex(8),allocatable :: zCt_Mpoint(:,:,:,:)
 
 
 end module ms_maxwell_ks_variables
