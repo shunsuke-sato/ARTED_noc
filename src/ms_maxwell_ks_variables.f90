@@ -27,6 +27,7 @@ module ms_maxwell_ks_variables
 ! parallelization
   integer :: Mpoints_per_procs
   integer :: nprocs_per_Mpoint_group
+  integer :: n_Mpoint_group
   integer :: id_Mpoint_group
   integer :: Mx_s, Mx_e
 

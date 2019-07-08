@@ -15,6 +15,7 @@
 !
 subroutine BE_dt_evolve_for_MS(Act_m_t)
   use global_variables
+  use ms_maxwell_ks_variables
   use PSE_variables
   implicit none
   real(8),intent(in) :: Act_m_t(nx_s:nx_e)

@@ -27,6 +27,7 @@ subroutine MS_current(jt_m_out,Ac_m_in)
   real(8) :: diff,xx
   integer :: ik,ib
   complex(8) :: zvec0(NB_basis, NB_TD)
+  integer :: ix_m
 
 
   jt_m_l = 0d0
@@ -66,7 +67,7 @@ subroutine MS_current(jt_m_out,Ac_m_in)
 
     zvec0(1:NB_basis, 1:NB_TD) = matmul(zPi_tot(:,:,ik),zCt_Mpoint(:,1:NB_TD,ik, ix_m))
     Band : do ib=1,NB_TD
-      jav_l = jav_l + occ(ib,ik)*sum(conjg(zCt_Mpint(:,ib,ik,ix_m))*zvec0(:, ib))
+      jav_l = jav_l + occ(ib,ik)*sum(conjg(zCt_Mpoint(:,ib,ik,ix_m))*zvec0(:, ib))
     end do Band
   end do K_point
 
