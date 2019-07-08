@@ -13,16 +13,21 @@
 !  See the License for the specific language governing permissions and
 !  limitations under the License.
 !
-subroutine BE_dt_evolve_for_MS(Act_t)
+subroutine BE_dt_evolve_for_MS(Act_m_t)
   use global_variables
   use PSE_variables
   implicit none
+  real(8),intent(in) :: Act_m_t(nx_s:nx_e)
   real(8) :: Act_t
   real(8),parameter :: eps_Act = 1d-6
   integer :: iav, iav_t
   real(8) :: diff,xx
   integer :: ik,ib,iexp
   complex(8) :: zfact
+  integer :: ix_m
+
+  M_point : do ix_m=Mx_s, Mx_e
+    Act_t = Act_m_t(ix_m)
 
 !== construct current matrix start
   diff = 1d10
@@ -48,14 +53,17 @@ subroutine BE_dt_evolve_for_MS(Act_t)
     zH_tot(ib,ib,:) = zH_tot(ib,ib,:) + 0.5d0*Act_t**2
   end do
 
-  call BE_dt_full_evolve_Taylor
+  call BE_dt_full_evolve_Taylor(ix_m)
+
+  end do M_point
 
 
   return
   contains
 
-    subroutine BE_dt_full_evolve_Taylor
+    subroutine BE_dt_full_evolve_Taylor(ix_m)
       implicit none
+      integer,intent(in) :: ix_m
       integer,parameter :: nexp_taylor = 4
       complex(8) :: zvec0(NB_basis, NB_TD)
       complex(8) :: zhvec0(NB_basis, NB_TD)
@@ -64,7 +72,7 @@ subroutine BE_dt_evolve_for_MS(Act_t)
       K_point : do ik=NK_s,NK_e
 
         zfact = 1d0
-        zvec0 = zCt(1:NB_basis, 1:NB_TD, ik)
+        zvec0 = zCt_Mpoint(1:NB_basis, 1:NB_TD, ik, ix_m)
         do iexp = 1, nexp_taylor
           zfact = zfact*(-zI*dt)/iexp
 !          zhvec0(1:NB_basis, 1:NB_TD) = matmul(&
@@ -79,7 +87,8 @@ subroutine BE_dt_evolve_for_MS(Act_t)
             NB_basis)
             
 
-          zCt(1:NB_basis, 1:NB_TD, ik) = zCt(1:NB_basis, 1:NB_TD, ik) &
+          zCt_Mpoint(1:NB_basis, 1:NB_TD, ik, ix_m) = &
+            zCt_Mpoint(1:NB_basis, 1:NB_TD, ik, ix_m) &
             +zfact*zhvec0(1:NB_basis, 1:NB_TD)
           if(iexp /= nexp_taylor)zvec0 = zhvec0
 
