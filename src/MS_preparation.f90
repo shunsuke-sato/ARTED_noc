@@ -32,22 +32,23 @@ subroutine MS_preparation
   Nx_s = -(15d-6/0.529177d-10)/dx_m
   Nx_e = +(15d-6/0.529177d-10)/dx_m
 
+  Mpoints_per_procs = 7
+  if(mod(Mx,Mpoints_per_procs) /=0)stop 'Error: mod(Mx,Mpoints_per_procs) /=0'
+  if(mod(nprocs,Mpoints_per_procs) /=0)stop 'Error: mod(nprocs,Mpoints_per_procs) /=0'
 
-  if(mod(Nprocs,Mx) /=0)stop 'Error Mx is not dividable by Nprocs'
+  n_Mpoint_group = Mx/Mpoints_per_procs
+  nprocs_per_Mpoint_group = nprocs/n_Mpoint_group
 
-  nprocs_per_Mpoint = Nprocs/Mx
-  do ix = 1, Mx
-    if(nprocs_per_Mpoint*ix > myrank)then
-      macro_point_id = ix
-      irank_m = myrank - nprocs_per_Mpoint*(ix-1)
-      exit
-    end if
-  end do
+  id_Mpoint_group = Myrank/nprocs_per_Mpoint_group
+  Mx_s = id_Mpoint_group*Mpoints_per_procs + 1
+  Mx_e = Mx_s + Mpoints_per_procs -1 
 
-  write(*,*)"myrak, macro_point_id,irank",myrank,macro_point_id,irank_m
+  irank_m = mod(myrank, nprocs_per_Mpoint_group)
+
+!  write(*,*)"myrak, macro_point_id,irank",myrank,macro_point_id,irank_m
 
 
-  NK_ave=NK/Nprocs_per_Mpoint; NK_remainder=mod(NK,Nprocs_per_Mpoint)
+  NK_ave=NK/Nprocs_per_Mpoint_group; NK_remainder=mod(NK,Nprocs_per_Mpoint_group)
   if(irank_m < NK_remainder)then
     NK_s=(NK_ave+1)*irank_m+1
     NK_e=(NK_ave+1)*irank_m+(NK_ave+1)
