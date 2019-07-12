@@ -24,6 +24,7 @@ subroutine MS_preparation
   write(*,*)myrank
 
   call init_grid
+  call pre_allocation_ms
   deallocate(Lx, iLx, iLx123)
 
 ! Parameter for maxwell-kohn-sham
