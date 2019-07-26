@@ -54,7 +54,8 @@ subroutine BE_dt_evolve_for_MS(Act_m_t)
     zH_tot(ib,ib,:) = zH_tot(ib,ib,:) + 0.5d0*Act_t**2
   end do
 
-  call BE_dt_full_evolve_Taylor(ix_m)
+!  call BE_dt_full_evolve_Taylor(ix_m)
+  call BE_dt_full_evolve_Krylov_exact_diag(ix_m)
 
   end do M_point
 
