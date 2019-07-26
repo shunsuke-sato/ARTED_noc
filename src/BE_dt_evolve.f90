@@ -25,6 +25,14 @@ subroutine BE_dt_evolve(Act_t)
   complex(8) :: zfact
 
 !== construct current matrix start
+  if(Act_t /= Act_t)then
+    err_message='Act_t is NaN.'
+    call err_finalize
+  else if(abs(Act_t) > Amax)then
+    err_message='Amax is too small.'
+    call err_finalize
+  end if
+
   diff = 1d10
   do iav = -NAmax,NAmax
     if( abs(Act_t-dble(iav)*dAmax) < diff)then
@@ -34,10 +42,7 @@ subroutine BE_dt_evolve(Act_t)
   end do
   if(iav_t == NAmax)iav_t=NAmax -1
   if(iav_t == -NAmax)iav_t=-NAmax +1
-  if(abs(Act_t) > Amax)then
-    err_message='Amax is too small.'
-    call err_finalize
-  end if
+
 
   xx = (Act_t-dble(iav_t)*dAmax)/dAmax
   zH_tot(:,:,:) = 0.5d0*zV_NL(:,:,:,iav_t+1)*(xx**2+xx) &

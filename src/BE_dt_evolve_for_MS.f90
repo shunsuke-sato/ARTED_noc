@@ -29,6 +29,13 @@ subroutine BE_dt_evolve_for_MS(Act_m_t)
 
   M_point : do ix_m=Mx_s, Mx_e
     Act_t = Act_m_t(ix_m)
+    if(Act_t /= Act_t)then
+      err_message='Act_t is NaN.'
+      call err_finalize
+    else if(abs(Act_t) > Amax)then
+      err_message='Amax is too small.'
+      call err_finalize
+    end if
 
 !== construct current matrix start
   diff = 1d10
@@ -40,10 +47,7 @@ subroutine BE_dt_evolve_for_MS(Act_m_t)
   end do
   if(iav_t == NAmax)iav_t=NAmax -1
   if(iav_t == -NAmax)iav_t=-NAmax +1
-  if(abs(Act_t) > Amax)then
-    err_message='Amax is too small.'
-    call err_finalize
-  end if
+
 
   xx = (Act_t-dble(iav_t)*dAmax)/dAmax
   zH_tot(:,:,:) = 0.5d0*zV_NL(:,:,:,iav_t+1)*(xx**2+xx) &

@@ -35,9 +35,17 @@ subroutine MS_current(jt_m_out,Ac_m_in)
   
 
   Act_t = Ac_m_in(ix_m)
+  if(Act_t /= Act_t)then
+    err_message='Act_t is NaN.'
+    call err_finalize
+  else if(abs(Act_t) > Amax)then
+    err_message='Amax is too small.'
+    call err_finalize
+  end if
   
 !== construct current matrix start
   diff = 1d10
+  iav_t = -NAmax
   do iav = -NAmax,NAmax
     if( abs(Act_t-dble(iav)*dAmax) < diff)then
       diff = abs(Act_t-dble(iav)*dAmax)
@@ -46,10 +54,6 @@ subroutine MS_current(jt_m_out,Ac_m_in)
   end do
   if(iav_t == NAmax)iav_t=NAmax -1
   if(iav_t == -NAmax)iav_t=-NAmax +1
-  if(abs(Act_t) > Amax)then
-    err_message='Amax is too small.'
-    call err_finalize
-  end if
 
   xx = (Act_t-dble(iav_t)*dAmax)/dAmax
   zPi_tot(:,:,:) = 0.5d0*zPi_NL(:,:,:,iav_t+1)*(xx**2+xx) &
