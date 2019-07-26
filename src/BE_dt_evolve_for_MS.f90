@@ -178,7 +178,8 @@ subroutine BE_dt_evolve_for_MS(Act_m_t)
           zUprop_m = matmul(matmul(zham_m,zUprop_m),conjg(transpose(zham_m)))
           zCt_Mpoint(1:NB_basis, ib, ik, ix_m) = zvec(:,ib,1)*zUprop_m(1,1)
           do ivec = 2, nvec
-            zCt_Mpoint(1:NB_basis, ib, ik, ix_m) = zvec(:,ib,ivec)*zUprop_m(ivec,1)
+            zCt_Mpoint(1:NB_basis, ib, ik, ix_m) = &
+              zCt_Mpoint(1:NB_basis, ib, ik, ix_m) + zvec(:,ib,ivec)*zUprop_m(ivec,1)
           end do
 
         end do
