@@ -98,5 +98,90 @@ subroutine BE_dt_evolve_for_MS(Act_m_t)
 
     end subroutine BE_dt_full_evolve_Taylor
 
+    subroutine BE_dt_full_evolve_Krylov_exact_diag(ix_m)
+      implicit none
+      integer,intent(in) :: ix_m
+      integer,parameter :: nvec = 16
+      complex(8) :: zvec(NB_basis, NB_TD, nvec)
+      complex(8) :: zhvec(NB_basis, NB_TD, nvec)
+      complex(8) :: zham_m(nvec, nvec),zUprop_m(nvec, nvec)
+      integer :: ib, ivec, jvec
+      real(8) :: ss
+      complex(8) :: zs
+!LAPACK
+      integer :: lwork
+      complex(8),allocatable :: work_lp(:)
+      real(8),allocatable :: rwork(:),w(:)
+      integer :: info
+
+      lwork=6*nvec+128
+      allocate(work_lp(lwork),rwork(3*nvec-2),w(nvec))
+      
+      K_point : do ik=NK_s,NK_e
+
+        zvec(1:NB_basis,1:NB_TD,1) = zCt_Mpoint(1:NB_basis, 1:NB_TD, ik, ix_m)
+!normalize
+        do ib = 1, nb_td
+          ss = sum(abs(zvec(:,ib,1))**2); ss = 1d0/sqrt(ss)
+          zvec(:,ib,1)=zvec(:,ib,1)*ss
+        end do
+
+!Construction of Krylov subspace
+        do ivec = 1, nvec
+
+          call zhemm('L', 'U', NB_basis, NB_TD, (1d0,0d0), &
+            zH_tot(1:NB_basis,1:NB_basis,ik), &
+            NB_basis,&
+            zvec(1:NB_basis,1:NB_TD, ivec), &
+            NB_basis, (0d0,0d0), &
+            zhvec(1:NB_basis,1:NB_TD,ivec), &
+            NB_basis)
+
+          if(ivec /= nvec)then
+            zvec(:,:,ivec+1) = zhvec(:,:,ivec)
+!Gram-Schmidt orthonormalization
+            do ib = 1, nb_td
+              do jvec = 1, ivec
+                zs = sum(conjg(zvec(:,ib,jvec))*zvec(:,ib,ivec+1))
+                zvec(:,ib,ivec+1) = zvec(:,ib,ivec+1) -zs*zvec(:,ib,jvec)
+              end do
+              ss = sum(abs(zvec(:,ib,ivec+1))**2); ss = 1d0/sqrt(ss)
+              zvec(:,ib,ivec+1)=zvec(:,ib,ivec+1)*ss
+            end do
+
+          end if
+
+        end do
+
+
+        do ib = 1, nb_td
+          do ivec = 1, nvec
+            zham_m(ivec,ivec) = sum( conjg(zhvec(:,ib,ivec))*zvec(:,ib,ivec))
+            do jvec = ivec+1, nvec
+              zham_m(ivec,jvec) = sum( conjg(zhvec(:,ib,ivec))*zvec(:,ib,jvec))
+              zham_m(jvec,ivec) = conjg(zham_m(ivec,jvec))
+            end do
+          end do
+
+!diag
+          call zheev('V', 'U', nvec, zham_m, nvec, w, work_lp, lwork, rwork, info)
+
+          zUprop_m = 0d0
+          do ivec = 1, nvec
+            zUprop_m(ivec, ivec) = exp(-zi*dt*w(ivec))
+          end do
+          zUprop_m = matmul(matmul(zham_m,zUprop_m),conjg(transpose(zham_m)))
+          zCt_Mpoint(1:NB_basis, ib, ik, ix_m) = zvec(:,ib,1)*zUprop_m(1,1)
+          do ivec = 2, nvec
+            zCt_Mpoint(1:NB_basis, ib, ik, ix_m) = zvec(:,ib,ivec)*zUprop_m(ivec,1)
+          end do
+
+        end do
+
+
+      end do K_point
+
+    end subroutine BE_dt_full_evolve_Krylov_exact_diag
+
 
   end subroutine BE_dt_evolve_for_MS
