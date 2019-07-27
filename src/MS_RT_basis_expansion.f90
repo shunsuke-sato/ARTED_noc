@@ -26,7 +26,7 @@ subroutine MS_RT_basis_expansion
   call init_wf_basis_expansion
   allocate(zCt_Mpoint(NB_basis,NB_TD,NK_s:NK_e,Mx_s:Mx_e))
   do ix_m = Mx_s, Mx_e
-    zCt_Mpoint(NB_basis,NB_TD,NK_s:NK_e,ix_m) = zCt(NB_basis,NB_TD,NK_s:NK_e)
+    zCt_Mpoint(1:NB_basis,1:NB_TD,NK_s:NK_e,ix_m) = zCt(1:NB_basis,1:NB_TD,NK_s:NK_e)
   end do
   
   call init_Ac_ms_basis_expansion
@@ -49,10 +49,8 @@ subroutine MS_RT_basis_expansion
 
 ! Compute Ac_m_n from Ac_m and Ac_m_o
     call dt_evolve_macro_field
-
     Act_m_t = 0.5d0*(Ac_m_n + Ac_m)
     call BE_dt_evolve_for_MS(Act_m_t)
-
     call MS_current(jt_m,Ac_m_n)
 
     Ac_m_o = Ac_m
