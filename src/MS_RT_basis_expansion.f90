@@ -17,13 +17,18 @@ subroutine MS_RT_basis_expansion
   use global_variables
   use ms_maxwell_ks_variables
   implicit none
-  integer :: iter,iter_t,ix
-  real(8) :: jav,Act_t
+  integer :: iter,iter_t,ix, ix_m
+  real(8) :: jav,Act_m_t(nx_s:nx_e)
   character(64) :: cit, cfilename
 
   if(myrank == 0)write(*,"(A)")"== Start real-time propagation with basis expansion."
 
   call init_wf_basis_expansion
+  allocate(zCt_Mpoint(NB_basis,NB_TD,NK_s:NK_e,Mx_s:Mx_e))
+  do ix_m = Mx_s, Mx_e
+    zCt_Mpoint(1:NB_basis,1:NB_TD,NK_s:NK_e,ix_m) = zCt(1:NB_basis,1:NB_TD,NK_s:NK_e)
+  end do
+  
   call init_Ac_ms_basis_expansion
 
   call MS_current(jt_m,Ac_m)
@@ -44,10 +49,8 @@ subroutine MS_RT_basis_expansion
 
 ! Compute Ac_m_n from Ac_m and Ac_m_o
     call dt_evolve_macro_field
-
-    Act_t = 0.5d0*(Ac_m_n(macro_point_id) + Ac_m(macro_point_id))
-    call BE_dt_evolve_for_MS(Act_t)
-
+    Act_m_t = 0.5d0*(Ac_m_n + Ac_m)
+    call BE_dt_evolve_for_MS(Act_m_t)
     call MS_current(jt_m,Ac_m_n)
 
     Ac_m_o = Ac_m

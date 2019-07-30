@@ -26,17 +26,26 @@ subroutine MS_current(jt_m_out,Ac_m_in)
   integer :: iav, iav_t
   real(8) :: diff,xx
   integer :: ik,ib
+  complex(8) :: zvec0(NB_basis, NB_TD)
+  integer :: ix_m
 
 
-  Act_t = Ac_m_in(macro_point_id)
   jt_m_l = 0d0
+  M_point : do ix_m=Mx_s, Mx_e
   
-!  kAc_Cvec(1,:)=kAc0_Cvec(1,:)+Act_t*Epdir_1(1)
-!  kAc_Cvec(2,:)=kAc0_Cvec(2,:)+Act_t*Epdir_1(2)
-!  kAc_Cvec(3,:)=kAc0_Cvec(3,:)+Act_t*Epdir_1(3)
 
+  Act_t = Ac_m_in(ix_m)
+  if(Act_t /= Act_t)then
+    err_message='Act_t is NaN.'
+    call err_finalize
+  else if(abs(Act_t) > Amax)then
+    err_message='Amax is too small.'
+    call err_finalize
+  end if
+  
 !== construct current matrix start
   diff = 1d10
+  iav_t = -NAmax
   do iav = -NAmax,NAmax
     if( abs(Act_t-dble(iav)*dAmax) < diff)then
       diff = abs(Act_t-dble(iav)*dAmax)
@@ -45,10 +54,6 @@ subroutine MS_current(jt_m_out,Ac_m_in)
   end do
   if(iav_t == NAmax)iav_t=NAmax -1
   if(iav_t == -NAmax)iav_t=-NAmax +1
-  if(abs(Act_t) > Amax)then
-    err_message='Amax is too small.'
-    call err_finalize
-  end if
 
   xx = (Act_t-dble(iav_t)*dAmax)/dAmax
   zPi_tot(:,:,:) = 0.5d0*zPi_NL(:,:,:,iav_t+1)*(xx**2+xx) &
@@ -61,18 +66,19 @@ subroutine MS_current(jt_m_out,Ac_m_in)
 !== construct current matrix end
 
   jav_l = 0d0
+!$omp parallel do private(ik, ib, zvec0) reduction(+:jav_l)
   K_point : do ik=NK_s,NK_e
-  Band : do ib=1,NB_TD
 
-    zACt_tmp(:) = matmul(zPi_tot(:,:,ik),zCt(:,ib,ik))
-    jav_l = jav_l + occ(ib,ik)*sum(conjg(zCt(:,ib,ik))*zACt_tmp(:))
-
-  end do Band
+    zvec0(1:NB_basis, 1:NB_TD) = matmul(zPi_tot(:,:,ik),zCt_Mpoint(:,1:NB_TD,ik, ix_m))
+    Band : do ib=1,NB_TD
+      jav_l = jav_l + occ(ib,ik)*sum(conjg(zCt_Mpoint(:,ib,ik,ix_m))*zvec0(:, ib))
+    end do Band
   end do K_point
 
   jav_l=jav_l/Vcell
 
-  jt_m_l(macro_point_id) = jav_l
+  jt_m_l(ix_m) = jt_m_l(ix_m) + jav_l
+  end do M_point
   
 
   call MPI_ALLREDUCE(jt_m_l,jt_m_out,Mx,MPI_REAL8,MPI_SUM,NEW_COMM_WORLD,ierr)  

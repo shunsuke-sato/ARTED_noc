@@ -25,6 +25,14 @@ subroutine BE_dt_evolve(Act_t)
   complex(8) :: zfact
 
 !== construct current matrix start
+  if(Act_t /= Act_t)then
+    err_message='Act_t is NaN.'
+    call err_finalize
+  else if(abs(Act_t) > Amax)then
+    err_message='Amax is too small.'
+    call err_finalize
+  end if
+
   diff = 1d10
   do iav = -NAmax,NAmax
     if( abs(Act_t-dble(iav)*dAmax) < diff)then
@@ -34,10 +42,7 @@ subroutine BE_dt_evolve(Act_t)
   end do
   if(iav_t == NAmax)iav_t=NAmax -1
   if(iav_t == -NAmax)iav_t=-NAmax +1
-  if(abs(Act_t) > Amax)then
-    err_message='Amax is too small.'
-    call err_finalize
-  end if
+
 
   xx = (Act_t-dble(iav_t)*dAmax)/dAmax
   zH_tot(:,:,:) = 0.5d0*zV_NL(:,:,:,iav_t+1)*(xx**2+xx) &
@@ -48,7 +53,8 @@ subroutine BE_dt_evolve(Act_t)
     zH_tot(ib,ib,:) = zH_tot(ib,ib,:) + 0.5d0*Act_t**2
   end do
 
-  call BE_dt_full_evolve_Taylor
+!  call BE_dt_full_evolve_Taylor
+  call BE_dt_full_evolve_Krylov_exact_diag
 
 contains
 
@@ -86,7 +92,93 @@ contains
 
   end subroutine BE_dt_full_evolve_Taylor
 
+    subroutine BE_dt_full_evolve_Krylov_exact_diag
+      implicit none
+      integer,parameter :: nvec = 16
+      complex(8) :: zvec(NB_basis, NB_TD, nvec)
+      complex(8) :: zhvec(NB_basis, NB_TD, nvec)
+      complex(8) :: zham_m(nvec, nvec),zUprop_m(nvec, nvec)
+      integer :: ib, ivec, jvec, ik
+      real(8) :: ss
+      complex(8) :: zs
+!LAPACK
+      integer :: lwork
+      complex(8),allocatable :: work_lp(:)
+      real(8),allocatable :: rwork(:),w(:)
+      integer :: info
+
+      lwork=6*nvec+128
+      allocate(work_lp(lwork),rwork(3*nvec-2),w(nvec))
+      
+      K_point : do ik=NK_s,NK_e
+
+        zvec(1:NB_basis,1:NB_TD,1) = zCt(1:NB_basis, 1:NB_TD, ik)
+!normalize
+        do ib = 1, nb_td
+          ss = sum(abs(zvec(:,ib,1))**2); ss = 1d0/sqrt(ss)
+          zvec(:,ib,1)=zvec(:,ib,1)*ss
+        end do
+
+!Construction of Krylov subspace
+        do ivec = 1, nvec
+
+          call zhemm('L', 'U', NB_basis, NB_TD, (1d0,0d0), &
+            zH_tot(1:NB_basis,1:NB_basis,ik), &
+            NB_basis,&
+            zvec(1:NB_basis,1:NB_TD, ivec), &
+            NB_basis, (0d0,0d0), &
+            zhvec(1:NB_basis,1:NB_TD,ivec), &
+            NB_basis)
+
+          if(ivec /= nvec)then
+            zvec(:,:,ivec+1) = zhvec(:,:,ivec)
+!Gram-Schmidt orthonormalization
+            do ib = 1, nb_td
+              do jvec = 1, ivec
+                zs = sum(conjg(zvec(:,ib,jvec))*zvec(:,ib,ivec+1))
+                zvec(:,ib,ivec+1) = zvec(:,ib,ivec+1) -zs*zvec(:,ib,jvec)
+              end do
+              ss = sum(abs(zvec(:,ib,ivec+1))**2); ss = 1d0/sqrt(ss)
+              zvec(:,ib,ivec+1)=zvec(:,ib,ivec+1)*ss
+            end do
+
+          end if
+
+        end do
+
+
+        do ib = 1, nb_td
+          do ivec = 1, nvec
+            zham_m(ivec,ivec) = sum( conjg(zhvec(:,ib,ivec))*zvec(:,ib,ivec))
+            do jvec = ivec+1, nvec
+              zham_m(ivec,jvec) = sum( conjg(zhvec(:,ib,ivec))*zvec(:,ib,jvec))
+              zham_m(jvec,ivec) = conjg(zham_m(ivec,jvec))
+            end do
+          end do
+
+!diag
+          call zheev('V', 'U', nvec, zham_m, nvec, w, work_lp, lwork, rwork, info)
+
+          zUprop_m = 0d0
+          do ivec = 1, nvec
+            zUprop_m(ivec, ivec) = exp(-zi*dt*w(ivec))
+          end do
+          zUprop_m = matmul(matmul(zham_m,zUprop_m),conjg(transpose(zham_m)))
+          zCt(1:NB_basis, ib, ik) = zvec(:,ib,1)*zUprop_m(1,1)
+          do ivec = 2, nvec
+            zCt(1:NB_basis, ib, ik) = &
+              zCt(1:NB_basis, ib, ik) + zvec(:,ib,ivec)*zUprop_m(ivec,1)
+          end do
+
+        end do
+
+
+      end do K_point
+
+    end subroutine BE_dt_full_evolve_Krylov_exact_diag
+
 end subroutine BE_dt_evolve
+!---------------------------------------------------------------------------------
 !---------------------------------------------------------------------------------
 subroutine BE_dt_evolve_old(Act_t)
   use global_variables

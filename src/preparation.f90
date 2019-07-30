@@ -175,8 +175,11 @@ subroutine preparation
   call MPI_BCAST(Kion,NI,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)  
   call MPI_BCAST(Rion_Lvec,3*NI,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)  
 !== input end
-
-
+  if(calc_mode=='multi_scale_basis')then
+    if(Myrank == 0)write(*,'(A)')'preparation is completed' 
+    return
+  end if
+  
   call init_grid
   call prep_finite_difference
   call NK_split

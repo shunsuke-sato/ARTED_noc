@@ -57,13 +57,12 @@ subroutine PSE_current_GS_DFT(jav)
     end do
 
     zft1(:,:,:)=zft1(:,:,:)/dble(NL1*NL2*NL3)
+
+
+   curr_l(1)=curr_l(1)+occ(ib,ik)*sum(abs(zft1(:,:,:))**2*(-Grad_x_zI(:,:,:)+kAc_Cvec(1,ik)))
+   curr_l(2)=curr_l(2)+occ(ib,ik)*sum(abs(zft1(:,:,:))**2*(-Grad_y_zI(:,:,:)+kAc_Cvec(2,ik)))
+   curr_l(3)=curr_l(3)+occ(ib,ik)*sum(abs(zft1(:,:,:))**2*(-Grad_z_zI(:,:,:)+kAc_Cvec(3,ik)))
     
-    curr_l(1)=curr_l(1)+occ(ib,ik)*(-sum(conjg(zft3(:,:,:))*Grad_x_zI(:,:,:)*zft1(:,:,:))+kAc_Cvec(1,ik))
-    curr_l(2)=curr_l(2)+occ(ib,ik)*(-sum(conjg(zft3(:,:,:))*Grad_y_zI(:,:,:)*zft1(:,:,:))+kAc_Cvec(2,ik))
-    curr_l(3)=curr_l(3)+occ(ib,ik)*(-sum(conjg(zft3(:,:,:))*Grad_z_zI(:,:,:)*zft1(:,:,:))+kAc_Cvec(3,ik))
-
-
-
     jx1t=0d0;jx2t=0d0;jx3t=0d0
     
     do ilma=1,Nlma
