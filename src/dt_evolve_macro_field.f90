@@ -18,10 +18,50 @@ subroutine dt_evolve_macro_field
   use ms_maxwell_ks_variables
   implicit none
 
+
+  call dt_evolve_macro_field_explicit_multi_step
 !  call dt_evolve_macro_field_explicit
-  call dt_evolve_macro_field_implicit
+!  call dt_evolve_macro_field_implicit
 
 contains
+!--------------------------------------------------------------
+  subroutine dt_evolve_macro_field_explicit_multi_step
+    implicit none
+    real(8) :: clap0, clap1
+    real(8) :: Lap_Ac(nx_s:nx_e)
+    real(8) :: jt_tmp(Mx), af(Mx), bf(Mx), cf(Mx)
+    integer :: ix
+    integer :: iter
+    real(8) :: xx
+    
+    clap0 = -2d0/dx_m**2
+    clap1 = 1d0/dx_m**2
+
+    af = (jt_m-2d0*jt_old_m+jt_old2_m)/dt**2
+    bf = 0.5d0*(3d0*jt_m-4d0*jt_old_m+jt_old2_m)/dt
+    cf = jt_m
+
+    do iter = 0, nt_internal_m-1
+      xx = dt_m*iter
+      jt_tmp = 0.5d0*af*xx**2+bf*xx+cf
+
+
+      Lap_Ac(nx_s) = clap0*Ac_m(nx_s) + clap1*Ac_m(nx_s+1)
+      do ix = nx_s+1,nx_e-1
+        Lap_Ac(ix) = clap0*Ac_m(ix) + clap1*(Ac_m(ix+1)+Ac_m(ix-1))
+      end do
+      Lap_Ac(nx_e) = clap0*Ac_m(nx_e) + clap1*Ac_m(nx_e-1)
+
+      Ac_m_n = 2d0*Ac_m - Ac_m_o + (dt_m*clight)**2*Lap_Ac
+      Ac_m_n(1:Mx) = Ac_m_n(1:Mx) -4d0*pi*dt_m**2*jt_tmp(1:Mx)
+
+      Ac_m_o = Ac_m
+      Ac_m = Ac_m_n
+      
+    end do
+
+
+  end subroutine dt_evolve_macro_field_explicit_multi_step
 !--------------------------------------------------------------
   subroutine dt_evolve_macro_field_explicit
     implicit none
