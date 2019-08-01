@@ -24,6 +24,10 @@ module ms_maxwell_ks_variables
   real(8) :: dx_m
   real(8),allocatable :: x_m(:)
 
+! time step
+  real(8) :: dt_m
+  integer :: nt_internal_m
+
 ! parallelization
   integer :: Mpoints_per_procs
   integer :: nprocs_per_Mpoint_group
@@ -35,7 +39,7 @@ module ms_maxwell_ks_variables
   integer :: NK_s_m, NK_e_m
 
 ! electromagnetic fields
-  real(8),allocatable :: Ac_m(:), jt_m(:)
+  real(8),allocatable :: Ac_m(:), jt_m(:), jt_old_m(:), jt_old2_m(:)
   real(8),allocatable :: Ac_m_n(:),Ac_m_o(:)
 
 ! wavefunction

@@ -32,6 +32,9 @@ subroutine MS_RT_basis_expansion
   call init_Ac_ms_basis_expansion
 
   call MS_current(jt_m,Ac_m)
+  jt_old2_m = jt_m
+  jt_old_m = jt_m
+
   if(myrank == 0)open(30,file='Ac_vac_rear.out')
   if(myrank == 0)write(30,"(999e26.16e3)")dt*0,Ac_m(0),Ac_m(Mx+1)
 
@@ -48,13 +51,14 @@ subroutine MS_RT_basis_expansion
     end if
 
 ! Compute Ac_m_n from Ac_m and Ac_m_o
+    Act_m_t = Ac_m
     call dt_evolve_macro_field
-    Act_m_t = 0.5d0*(Ac_m_n + Ac_m)
+    Act_m_t = 0.5d0*(Act_m_t + Ac_m)
     call BE_dt_evolve_for_MS(Act_m_t)
-    call MS_current(jt_m,Ac_m_n)
+    jt_old2_m = jt_old_m
+    jt_old_m = jt_m
+    call MS_current(jt_m,Ac_m)
 
-    Ac_m_o = Ac_m
-    Ac_m   = Ac_m_n
     if(myrank == 0)write(30,"(999e26.16e3)")dt*(iter+1),Ac_m(0),Ac_m(Mx+1)
 
 

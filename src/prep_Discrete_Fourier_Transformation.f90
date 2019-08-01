@@ -98,9 +98,9 @@ subroutine prep_Discrete_Fourier_Transformation
     k1_t = k1(i)
     k2_t = k2(j)
     k3_t = k3(k)
-    if(i==NL1/2)k1_t = 0d0
-    if(j==NL2/2)k2_t = 0d0
-    if(k==NL3/2)k3_t = 0d0
+!    if(i==NL1/2)k1_t = 0d0
+!    if(j==NL2/2)k2_t = 0d0
+!    if(k==NL3/2)k3_t = 0d0
 
     Lap_k(i,j,k)=-Bt(1,1)*k1(i)*k1(i)-Bt(1,2)*k1_t*k2_t-Bt(1,3)*k1_t*k3_t &
                  -Bt(2,1)*k2_t*k1_t-Bt(2,2)*k2(j)*k2(j)-Bt(2,3)*k2_t*k3_t &

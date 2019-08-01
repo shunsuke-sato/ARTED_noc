@@ -33,6 +33,19 @@ subroutine MS_preparation
   Nx_s = -(15d-6/0.529177d-10)/dx_m
   Nx_e = +(15d-6/0.529177d-10)/dx_m
 
+  dt_m = 0.01d0
+  if(myrank == 0)write(*,"(A,2x,e26.16e3)")"input dt_m=",dt_m
+
+  if(dt_m >= dt)then
+    dt_m = dt
+    nt_internal_m = 1
+  else
+    nt_internal_m = aint(dt/dt_m)+1
+    dt_m = dt/nt_internal_m
+  end if
+
+  if(myrank == 0)write(*,"(A,2x,e26.16e3)")"refined dt_m=",dt_m
+
   Mpoints_per_procs = 7
   if(mod(Mx,Mpoints_per_procs) /=0)stop 'Error: mod(Mx,Mpoints_per_procs) /=0'
   if(mod(nprocs,Mpoints_per_procs) /=0)stop 'Error: mod(nprocs,Mpoints_per_procs) /=0'
