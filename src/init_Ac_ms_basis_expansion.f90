@@ -23,6 +23,7 @@ subroutine init_Ac_ms_basis_expansion
 
   if(myrank == 0)write(*,"(A)")"== Start: Initialization of vector potential."
   allocate(Ac_m(nx_s:nx_e), jt_m(Mx))
+  allocate(jt_old_m(Mx), jt_old2_m(Mx))
   allocate(Ac_m_n(nx_s:nx_e), Ac_m_o(nx_s:nx_e))
   allocate(x_m(nx_s:nx_e))
 
@@ -55,7 +56,7 @@ subroutine init_Ac_ms_basis_expansion
       end if
 
 !t=-dt
-      tt = -dt -x_m(ix)/clight-0.5d0*tpulse_1
+      tt = -dt_m -x_m(ix)/clight-0.5d0*tpulse_1
       if(abs(tt)<0.5d0*tpulse_1)then
         Ac_m_o(ix) = -f0_1/omega_1*cos(pi*tt/tpulse_1)**2*sin(omega_1*tt)
       end if
@@ -70,7 +71,7 @@ subroutine init_Ac_ms_basis_expansion
         Ac_m(ix) = Ac_m(ix) -f0_2/omega_2*cos(pi*tt/tpulse_2)**2*sin(omega_2*tt)
       end if
 
-      tt = -dt -x_m(ix)/clight-0.5d0*tpulse_1 - T1_T2
+      tt = -dt_m -x_m(ix)/clight-0.5d0*tpulse_1 - T1_T2
       if(abs(tt)<0.5d0*tpulse_2)then
         Ac_m_o(ix) = Ac_m_o(ix) -f0_2/omega_2*cos(pi*tt/tpulse_2)**2*sin(omega_2*tt)
       end if
@@ -90,7 +91,7 @@ subroutine init_Ac_ms_basis_expansion
       end if
 
 !t=-dt
-      tt = -dt -x_m(ix)/clight-0.5d0*tpulse_1
+      tt = -dt_m -x_m(ix)/clight-0.5d0*tpulse_1
       if(abs(tt)<0.5d0*tpulse_1)then
         Ac_m_o(ix) = -f0_1/omega_1*cos(pi*tt/tpulse_1)**4*sin(omega_1*tt)
       end if
@@ -105,7 +106,40 @@ subroutine init_Ac_ms_basis_expansion
         Ac_m(ix) = Ac_m(ix) -f0_2/omega_2*cos(pi*tt/tpulse_2)**4*sin(omega_2*tt)
       end if
 
-      tt = -dt -x_m(ix)/clight-0.5d0*tpulse_1 - T1_T2
+      tt = -dt_m -x_m(ix)/clight-0.5d0*tpulse_1 - T1_T2
+      if(abs(tt)<0.5d0*tpulse_2)then
+        Ac_m_o(ix) = Ac_m_o(ix) -f0_2/omega_2*cos(pi*tt/tpulse_2)**4*sin(omega_2*tt)
+      end if
+
+
+    end do
+  case('Acos2_4')
+! pump
+    do ix = nx_s, nx_e
+
+!t=0
+      tt = 0d0 -x_m(ix)/clight-0.5d0*tpulse_1
+      if(abs(tt)<0.5d0*tpulse_1)then
+        Ac_m(ix) = -f0_1/omega_1*cos(pi*tt/tpulse_1)**2*sin(omega_1*tt)
+      end if
+
+!t=-dt
+      tt = -dt_m -x_m(ix)/clight-0.5d0*tpulse_1
+      if(abs(tt)<0.5d0*tpulse_1)then
+        Ac_m_o(ix) = -f0_1/omega_1*cos(pi*tt/tpulse_1)**2*sin(omega_1*tt)
+      end if
+
+    end do
+! pump
+    do ix = nx_s, nx_e
+
+!t=0
+      tt = 0d0 -x_m(ix)/clight-0.5d0*tpulse_1 - T1_T2
+      if(abs(tt)<0.5d0*tpulse_2)then
+        Ac_m(ix) = Ac_m(ix) -f0_2/omega_2*cos(pi*tt/tpulse_2)**4*sin(omega_2*tt)
+      end if
+
+      tt = -dt_m -x_m(ix)/clight-0.5d0*tpulse_1 - T1_T2
       if(abs(tt)<0.5d0*tpulse_2)then
         Ac_m_o(ix) = Ac_m_o(ix) -f0_2/omega_2*cos(pi*tt/tpulse_2)**4*sin(omega_2*tt)
       end if

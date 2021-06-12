@@ -138,8 +138,6 @@ Subroutine rho_j_tau(GS_RT,rho_s,tau_s,j_s,grho_s,lrho_s)
       end do Band
     end do K_point
 
-!$omp end parallel
-
   else  if(GS_RT == 'RT')then
     stop
   else

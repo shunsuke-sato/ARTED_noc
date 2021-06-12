@@ -24,17 +24,26 @@ module ms_maxwell_ks_variables
   real(8) :: dx_m
   real(8),allocatable :: x_m(:)
 
+! time step
+  real(8) :: dt_m
+  integer :: nt_internal_m
+
 ! parallelization
-  integer :: nprocs_per_Mpoint
-  integer :: macro_point_id
+  integer :: Mpoints_per_procs
+  integer :: nprocs_per_Mpoint_group
+  integer :: n_Mpoint_group
+  integer :: id_Mpoint_group
+  integer :: Mx_s, Mx_e
 
 ! orbital
   integer :: NK_s_m, NK_e_m
 
 ! electromagnetic fields
-  real(8),allocatable :: Ac_m(:), jt_m(:)
+  real(8),allocatable :: Ac_m(:), jt_m(:), jt_old_m(:), jt_old2_m(:)
   real(8),allocatable :: Ac_m_n(:),Ac_m_o(:)
 
+! wavefunction
+  complex(8),allocatable :: zCt_Mpoint(:,:,:,:)
 
 
 end module ms_maxwell_ks_variables
