@@ -53,8 +53,8 @@ subroutine BE_dt_evolve(Act_t)
     zH_tot(ib,ib,:) = zH_tot(ib,ib,:) + 0.5d0*Act_t**2
   end do
 
-!  call BE_dt_full_evolve_Taylor
-  call BE_dt_full_evolve_Krylov_exact_diag
+  call BE_dt_full_evolve_Taylor
+!  call BE_dt_full_evolve_Krylov_exact_diag
 
 contains
 
@@ -131,14 +131,31 @@ contains
             NB_basis)
 
           if(ivec /= nvec)then
-            zvec(:,:,ivec+1) = zhvec(:,:,ivec)
+            do ib = 1, nb_td
+              ss = sum(conjg(zvec(:,ib,ivec))*zhvec(:,ib,ivec))
+              zvec(:,ib,ivec+1) = zhvec(:,ib,ivec)-ss*zvec(:,ib,ivec)
+              ss = sum(abs(zvec(:,ib,ivec+1))**2)
+              if(ss == 0d0)then
+                write(*,"(A)")'Warning: (a) linear dependency in BE_dt_full_evolve_Krylov_exact_diag'
+                zvec(:,ib,ivec+1)=1d0/sqrt(dble(NB_basis))
+              else
+                ss = 1d0/sqrt(ss)
+                zvec(:,ib,ivec+1)=zvec(:,ib,ivec+1)*ss
+              end if
+            end do
+
 !Gram-Schmidt orthonormalization
             do ib = 1, nb_td
               do jvec = 1, ivec
                 zs = sum(conjg(zvec(:,ib,jvec))*zvec(:,ib,ivec+1))
                 zvec(:,ib,ivec+1) = zvec(:,ib,ivec+1) -zs*zvec(:,ib,jvec)
               end do
-              ss = sum(abs(zvec(:,ib,ivec+1))**2); ss = 1d0/sqrt(ss)
+              ss = sum(abs(zvec(:,ib,ivec+1))**2)
+              if(ss == 0d0)then
+                write(*,"(A)")'Warning: (b) linear dependency in BE_dt_full_evolve_Krylov_exact_diag'
+                stop
+              end if
+              ss = 1d0/sqrt(ss)
               zvec(:,ib,ivec+1)=zvec(:,ib,ivec+1)*ss
             end do
 

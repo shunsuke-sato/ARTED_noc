@@ -1,4 +1,4 @@
-'GS'                                ! calc_mode 'RT', 'BD','GS', or 'multi_scale_basis'
+'MT'                                ! calc_mode 'RT', 'BD','GS', or 'multi_scale_basis'
 'N'                                 ! entrance_option 'N' or 'R'
 1d10                                ! Time_shoutdown (sec)
 'diamond'                                ! SYSname
@@ -10,18 +10,18 @@
 1.0  1.0  0.0                       ! a_vec(:,3) : latice vector
 6.74d0  0.5  0.5  0.5  ! Ref. Semiconductors, Data handbook, aL,aL1,aL2,aL3,
 12 12 12                           ! NL1,NL2,NL3
-4  4  4                             ! NK1,NK2,NK3
-16  8                                ! NB,Nelec (# of bands, # of electrons)
+2  2  2                             ! NK1,NK2,NK3
+8  8                                ! NB,Nelec (# of bands, # of electrons)
 5  300                              ! Ncg ,Nscf (# of CG method,# of ground state iteration)
-30000  0.04  0                        ! Nt,dt,Npred_corr real-time parameter
+8000  0.08  0                        ! Nt,dt,Npred_corr real-time parameter
 'N'  600                             ! option_TD_band_dos, Nstep_TD_band_dos ('Y' or 'N')
 'N'                                 ! option_IP ('Y' or 'N')
 0.001                               ! dAc (initial distortion in response)
-'Acos2_4'  'Tr'                          ! laser_type 'cos2cos', 'cos4cos' or 'impulse',  Tr_Lo 'Tr' or 'Lo'
-5d12  20.0  1.55  .0                ! IWcm2_1, tpulsefs_1(fs), omegaev_1(eV), phi_CEP_1(2pi) :laser
+'cos2cos'  'Tr'                          ! laser_type 'cos2cos', 'cos4cos' or 'impulse',  Tr_Lo 'Tr' or 'Lo'
+1d10  20.0  1.55  .0                ! IWcm2_1, tpulsefs_1(fs), omegaev_1(eV), phi_CEP_1(2pi) :laser
 1. 0. 0.                            ! Epdir_1 (Cartesian component of Ac)
-1d10  1d0   40d0  .0                ! IWcm2_2, tpulsefs_2(fs), omegaev_2(eV), phi_CEP_2(2pi) :laser
-1. 0. 0.                            ! Epdir_2 (Cartesian component of Ac)
+0d10  1d0   40d0  .0                ! IWcm2_2, tpulsefs_2(fs), omegaev_2(eV), phi_CEP_2(2pi) :laser
+0. 0. 0.                            ! Epdir_2 (Cartesian component of Ac)
 0.0d0                                ! T1_T2fs(fs)
 2  1                                ! NI,NE
 6                                  ! Zatom(j),j=1,NE
