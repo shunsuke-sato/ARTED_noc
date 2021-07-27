@@ -28,9 +28,9 @@ subroutine BE_matrix_element_for_dielectric_function
   zPi_tot(:,:,:,:) =  zPi_loc(:,:,:,:) + zPi_NL(:,:,:,:,0)
 
   do ik = NK_s,NK_e
-    zmat_tmp = zPi_tot(:,:,:,1)*Epdir_1(1) &
-              +zPi_tot(:,:,:,2)*Epdir_1(2) &
-              +zPi_tot(:,:,:,3)*Epdir_1(3)
+    zmat_tmp = zPi_tot(:,:,ik,1)*Epdir_1(1) &
+              +zPi_tot(:,:,ik,2)*Epdir_1(2) &
+              +zPi_tot(:,:,ik,3)*Epdir_1(3)
 
     do ib1=1,NB_basis
       do ib2=ib1,NB_basis

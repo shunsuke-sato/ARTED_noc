@@ -164,7 +164,7 @@ subroutine PSE_ppsi_DFT_3d(ik)
     pitpsi_3d(i,1)=zft2(iLx(1,i),iLx(2,i),iLx(3,i))
   end do
 
-  pitpsi(:,1)=pitpsi(:,1)+kAc_Cvec(1,ik)*tpsi
+  pitpsi_3d(:,1)=pitpsi_3d(:,1)+kAc_Cvec(1,ik)*tpsi
 
 !== x-direction: End==
 
@@ -200,7 +200,7 @@ subroutine PSE_ppsi_DFT_3d(ik)
     pitpsi_3d(i,2)=zft2(iLx(1,i),iLx(2,i),iLx(3,i))
   end do
 
-  pitpsi(:,2)=pitpsi(:,2)+kAc_Cvec(2,ik)*tpsi
+  pitpsi_3d(:,2)=pitpsi_3d(:,2)+kAc_Cvec(2,ik)*tpsi
 
 !== y-direction: End==
 
@@ -236,7 +236,7 @@ subroutine PSE_ppsi_DFT_3d(ik)
     pitpsi_3d(i,3)=zft2(iLx(1,i),iLx(2,i),iLx(3,i))
   end do
 
-  pitpsi(:,3)=pitpsi(:,3)+kAc_Cvec(3,ik)*tpsi
+  pitpsi_3d(:,3)=pitpsi_3d(:,3)+kAc_Cvec(3,ik)*tpsi
 
 !== z-direction: End==
 

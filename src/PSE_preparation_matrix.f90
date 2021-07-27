@@ -63,17 +63,17 @@ subroutine PSE_preparation_matrix
       do ib1=ib2,NB_basis
 !        zs=sum(conjg(zu_basis(:,ib1,ik))*htpsi(:))*H123
         if(ib1 == ib2) then
-          zPi_loc(ib1,ib2,ik,1)=real(sum(conjg(zu_basis(:,ib1,ik))*pitpsi(:,1))*H123)
-          zPi_loc(ib1,ib2,ik,2)=real(sum(conjg(zu_basis(:,ib1,ik))*pitpsi(:,2))*H123)
-          zPi_loc(ib1,ib2,ik,3)=real(sum(conjg(zu_basis(:,ib1,ik))*pitpsi(:,3))*H123)
+          zPi_loc(ib1,ib2,ik,1)=real(sum(conjg(zu_basis(:,ib1,ik))*pitpsi_3d(:,1))*H123)
+          zPi_loc(ib1,ib2,ik,2)=real(sum(conjg(zu_basis(:,ib1,ik))*pitpsi_3d(:,2))*H123)
+          zPi_loc(ib1,ib2,ik,3)=real(sum(conjg(zu_basis(:,ib1,ik))*pitpsi_3d(:,3))*H123)
         else
-          zPi_loc(ib1,ib2,ik,1)=sum(conjg(zu_basis(:,ib1,ik))*pitpsi(:,1))*H123
+          zPi_loc(ib1,ib2,ik,1)=sum(conjg(zu_basis(:,ib1,ik))*pitpsi_3d(:,1))*H123
           zPi_loc(ib2,ib1,ik,1)=conjg(zPi_loc(ib1,ib2,ik,1))
           
-          zPi_loc(ib1,ib2,ik,2)=sum(conjg(zu_basis(:,ib1,ik))*pitpsi(:,2))*H123
+          zPi_loc(ib1,ib2,ik,2)=sum(conjg(zu_basis(:,ib1,ik))*pitpsi_3d(:,2))*H123
           zPi_loc(ib2,ib1,ik,2)=conjg(zPi_loc(ib1,ib2,ik,2))
 
-          zPi_loc(ib1,ib2,ik,3)=sum(conjg(zu_basis(:,ib1,ik))*pitpsi(:,3))*H123
+          zPi_loc(ib1,ib2,ik,3)=sum(conjg(zu_basis(:,ib1,ik))*pitpsi_3d(:,3))*H123
           zPi_loc(ib2,ib1,ik,3)=conjg(zPi_loc(ib1,ib2,ik,3))
         end if
 

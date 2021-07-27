@@ -46,9 +46,9 @@ subroutine BE_energy(Act_t)
   zH_tot(:,:,:) = 0.5d0*zV_NL(:,:,:,iav_t+1)*(xx**2+xx) &
     +0.5d0*zV_NL(:,:,:,iav_t-1)*(xx**2-xx) &
     +      zV_NL(:,:,:,iav_t)*(1d0 - xx**2)
-  zH_tot = zH_tot + zH_loc + Act_t*(zPi_loc_(:,:,:,1)*Epdir_1(1) &
-                                   +zPi_loc_(:,:,:,2)*Epdir_1(2) &
-                                   +zPi_loc_(:,:,:,3)*Epdir_1(3) )
+  zH_tot = zH_tot + zH_loc + Act_t*(zPi_loc(:,:,:,1)*Epdir_1(1) &
+                                   +zPi_loc(:,:,:,2)*Epdir_1(2) &
+                                   +zPi_loc(:,:,:,3)*Epdir_1(3) )
 
   do ib = 1,NB_basis
     zH_tot(ib,ib,:) = zH_tot(ib,ib,:) + 0.5d0*Act_t**2
