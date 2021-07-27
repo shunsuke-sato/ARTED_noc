@@ -17,7 +17,7 @@ subroutine PSE_real_time_propagation_basis_expansion
   use global_variables
   implicit none
   integer :: iter,iter_t
-  real(8) :: jav,Act_t
+  real(8) :: jav(3),Act_t
 
   if(myrank == 0)write(*,"(A)")"== Start real-time propagation with basis expansion."
 
@@ -37,7 +37,7 @@ subroutine PSE_real_time_propagation_basis_expansion
 !== Start current
   Act_t = Actot_BE(0)
   call BE_current(jav,Act_t)
-  javt_BE(0)=jav
+  javt_BE(0,:)=jav
 !== End current
 
   do iter=0,Nt
@@ -54,7 +54,7 @@ subroutine PSE_real_time_propagation_basis_expansion
 !== Start current
   Act_t = Actot_BE(iter+1)
   call BE_current(jav,Act_t)
-  javt_BE(iter+1)=jav
+  javt_BE(iter+1,:)=jav
 !== End current
 
 !== Start energy
@@ -68,7 +68,7 @@ subroutine PSE_real_time_propagation_basis_expansion
     if(myrank == 0)then
       open(102,file=trim(SYSname)//'_jac.out')
       do iter_t=0,Nt+1
-        write(102,'(100e26.16e3)')Dt*dble(iter_t),Actot_BE(iter_t),javt_BE(iter_t)
+        write(102,'(100e26.16e3)')Dt*dble(iter_t),Actot_BE(iter_t),javt_BE(iter_t,:)
       end do
       close(102)
     end if
