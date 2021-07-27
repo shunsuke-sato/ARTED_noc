@@ -28,6 +28,7 @@ subroutine BE_dt_evolve_Houston_probe_decomp(iter,Act_t)
   real(8) :: Act_tmp,Act_probe_tmp
   complex(8) :: zvec_t(NB_basis,NB_TD)
   integer :: ierr_lan
+  complex(8),allocatable :: zMat_tmp(:,:)
 !LAPACK
   integer :: lwork
   complex(8),allocatable :: work_lp(:)
@@ -45,6 +46,7 @@ subroutine BE_dt_evolve_Houston_probe_decomp(iter,Act_t)
   lwork=6*NB_basis
   allocate(work_lp(lwork),rwork(3*NB_basis-2),w(NB_basis))
   allocate(zMat_diag(NB_basis,NB_basis))
+  allocate(zMat_tmp(NB_basis,NB_basis))
 
 ! Propagation with Houston decomposition for probe Hamiltonian
 ! Here, we employ etrs propagation scheme
@@ -77,7 +79,9 @@ subroutine BE_dt_evolve_Houston_probe_decomp(iter,Act_t)
   zH_tot(:,:,:) = 0.5d0*zV_NL(:,:,:,iav_t+1)*(xx**2+xx) &
     +0.5d0*zV_NL(:,:,:,iav_t-1)*(xx**2-xx) &
     +      zV_NL(:,:,:,iav_t)*(1d0 - xx**2)
-  zH_tot = zH_tot + zH_loc + zPi_loc*Act_tmp
+  zH_tot = zH_tot + zH_loc + Act_tmp*(zPi_loc(:,:,:,1)*Epdir_1(1) &
+                                     +zPi_loc(:,:,:,2)*Epdir_1(2) &
+                                     +zPi_loc(:,:,:,3)*Epdir_1(3) )
   do ib = 1,NB_basis
     zH_tot(ib,ib,:) = zH_tot(ib,ib,:) + 0.5d0*Act_tmp**2
   end do
@@ -106,7 +110,9 @@ subroutine BE_dt_evolve_Houston_probe_decomp(iter,Act_t)
   zdH_tot(:,:,:) = 0.5d0*zV_NL(:,:,:,iav_t+1)*(xx**2+xx) &
     +0.5d0*zV_NL(:,:,:,iav_t-1)*(xx**2-xx) &
     +      zV_NL(:,:,:,iav_t)*(1d0 - xx**2)
-  zdH_tot = zdH_tot + zH_loc + zPi_loc*Act_t
+  zdH_tot = zdH_tot + zH_loc + Act_t*(zPi_loc(:,:,:,1)*Epdir_1(1) &
+                                     +zPi_loc(:,:,:,2)*Epdir_1(2) &
+                                     +zPi_loc(:,:,:,3)*Epdir_1(3) )
   do ib = 1,NB_basis
     zdH_tot(ib,ib,:) = zdH_tot(ib,ib,:) + 0.5d0*Act_t**2
   end do
@@ -120,12 +126,12 @@ subroutine BE_dt_evolve_Houston_probe_decomp(iter,Act_t)
   do ik = NK_s,NK_e
     zMat_diag(:,:)=zH_tot(:,:,ik)
     call zheev('V', 'U', NB_basis, zMat_diag, NB_basis, w, work_lp, lwork, rwork, info)
-    zPi_tot(:,:,ik) = matmul(zdH_tot(:,:,ik),zMat_diag(:,:))
-    zdH_tot(:,:,ik) = matmul(transpose(conjg(zMat_diag(:,:))),zPi_tot(:,:,ik))
+    zMat_tmp(:,:) = matmul(zdH_tot(:,:,ik),zMat_diag(:,:))
+    zdH_tot(:,:,ik) = matmul(transpose(conjg(zMat_diag(:,:))),zMat_tmp(:,:))
     zdH_tot(:,:,ik) = zdH_tot(:,:,ik)*Mask_probe(:,:)
 
-    zPi_tot(:,:,ik) = matmul(zdH_tot(:,:,ik),transpose(conjg(zMat_diag(:,:))))
-    zdH_tot(:,:,ik) = matmul(zMat_diag(:,:),zPi_tot(:,:,ik))
+    zMat_tmp(:,:) = matmul(zdH_tot(:,:,ik),transpose(conjg(zMat_diag(:,:))))
+    zdH_tot(:,:,ik) = matmul(zMat_diag(:,:),zMat_tmp(:,:))
 
     zH_tot(:,:,ik) = zH_tot(:,:,ik) + zdH_tot(:,:,ik)
   end do
@@ -314,6 +320,7 @@ subroutine BE_dt_evolve_Houston_probe_decomp_org(iter,Act_t)
   complex(8) :: zfact
   real(8) :: Act_tmp
   complex(8) :: zvec_t(NB_basis,NB_TD)
+  complex(8),allocatable :: zMat_tmp(:,:)
 !LAPACK
   integer :: lwork
   complex(8),allocatable :: work_lp(:)
@@ -331,6 +338,7 @@ subroutine BE_dt_evolve_Houston_probe_decomp_org(iter,Act_t)
   lwork=6*NB_basis
   allocate(work_lp(lwork),rwork(3*NB_basis-2),w(NB_basis))
   allocate(zMat_diag(NB_basis,NB_basis))
+  allocate(zMat_tmp(NB_basis,NB_basis))
 
 ! Propagation with Houston decomposition for probe Hamiltonian
 ! Here, we employ etrs propagation scheme
@@ -358,7 +366,9 @@ subroutine BE_dt_evolve_Houston_probe_decomp_org(iter,Act_t)
   zH_tot(:,:,:) = 0.5d0*zV_NL(:,:,:,iav_t+1)*(xx**2+xx) &
     +0.5d0*zV_NL(:,:,:,iav_t-1)*(xx**2-xx) &
     +      zV_NL(:,:,:,iav_t)*(1d0 - xx**2)
-  zH_tot = zH_tot + zH_loc + zPi_loc*Act_tmp
+  zH_tot = zH_tot + zH_loc + Act_tmp*(zPi_loc(:,:,:,1)*Epdir_1(1) &
+                                     +zPi_loc(:,:,:,2)*Epdir_1(2) &
+                                     +zPi_loc(:,:,:,3)*Epdir_1(3) )
   do ib = 1,NB_basis
     zH_tot(ib,ib,:) = zH_tot(ib,ib,:) + 0.5d0*Act_tmp**2
   end do
@@ -380,21 +390,26 @@ subroutine BE_dt_evolve_Houston_probe_decomp_org(iter,Act_t)
   end if
 
   xx = (Act_tmp-dble(iav_t)*dAmax)/dAmax
-  zPi_tot(:,:,:) = 0.5d0*zPi_NL(:,:,:,iav_t+1)*(xx**2+xx) &
-                  +0.5d0*zPi_NL(:,:,:,iav_t-1)*(xx**2-xx) &
-                  +      zPi_NL(:,:,:,iav_t)*(1d0 - xx**2)
+  zPi_tot(:,:,:,:) = 0.5d0*zPi_NL(:,:,:,:,iav_t+1)*(xx**2+xx) &
+                  +0.5d0*zPi_NL(:,:,:,:,iav_t-1)*(xx**2-xx) &
+                  +      zPi_NL(:,:,:,:,iav_t)*(1d0 - xx**2)
   zPi_tot = zPi_tot + zPi_loc
   do ib = 1,NB_basis
-    zPi_tot(ib,ib,:) = zPi_tot(ib,ib,:) + Act_tmp
+    zPi_tot(ib,ib,:,1) = zPi_tot(ib,ib,:,1) + Act_tmp*Epdir_1(1)
+    zPi_tot(ib,ib,:,2) = zPi_tot(ib,ib,:,2) + Act_tmp*Epdir_1(2)
+    zPi_tot(ib,ib,:,3) = zPi_tot(ib,ib,:,3) + Act_tmp*Epdir_1(3)
   end do
 !== construct current matrix end
 
   do ik = NK_s,NK_e
     zMat_diag(:,:)=zH_tot(:,:,ik)
     call zheev('V', 'U', NB_basis, zMat_diag, NB_basis, w, work_lp, lwork, rwork, info)
-    zdH_tot(:,:,ik) = matmul(zPi_tot(:,:,ik),zMat_diag(:,:))
-    zPi_tot(:,:,ik) = matmul(transpose(conjg(zMat_diag(:,:))),zdH_tot(:,:,ik))
-    zdH_tot(:,:,ik) = zPi_tot(:,:,ik)*Ac_probe_BE(iter)*Mask_probe(:,:)
+    zMat_tmp(:,:) = zPi_tot(:,:,ik,1)*Epdir_1(1) &
+                   +zPi_tot(:,:,ik,2)*Epdir_1(2) &
+                   +zPi_tot(:,:,ik,3)*Epdir_1(3) 
+    zdH_tot(:,:,ik) = matmul(zMat_tmp(:,:),zMat_diag(:,:))
+    zMat_tmp(:,:) = matmul(transpose(conjg(zMat_diag(:,:))),zdH_tot(:,:,ik))
+    zdH_tot(:,:,ik) = zMat_tmp(:,:)*Ac_probe_BE(iter)*Mask_probe(:,:)
 
     zvec_t(:,:) = matmul(transpose(conjg(zMat_diag(:,:))),zCt(:,:,ik))
 
@@ -449,7 +464,9 @@ subroutine BE_dt_evolve_Houston_probe_decomp_org(iter,Act_t)
   zH_tot(:,:,:) = 0.5d0*zV_NL(:,:,:,iav_t+1)*(xx**2+xx) &
     +0.5d0*zV_NL(:,:,:,iav_t-1)*(xx**2-xx) &
     +      zV_NL(:,:,:,iav_t)*(1d0 - xx**2)
-  zH_tot = zH_tot + zH_loc + zPi_loc*Act_tmp
+  zH_tot = zH_tot + zH_loc + Act_tmp*(zPi_loc(:,:,:,1)*Epdir_1(1) &
+                                     +zPi_loc(:,:,:,2)*Epdir_1(2) &
+                                     +zPi_loc(:,:,:,3)*Epdir_1(3) )
   do ib = 1,NB_basis
     zH_tot(ib,ib,:) = zH_tot(ib,ib,:) + 0.5d0*Act_tmp**2
   end do
@@ -471,21 +488,27 @@ subroutine BE_dt_evolve_Houston_probe_decomp_org(iter,Act_t)
   end if
 
   xx = (Act_tmp-dble(iav_t)*dAmax)/dAmax
-  zPi_tot(:,:,:) = 0.5d0*zPi_NL(:,:,:,iav_t+1)*(xx**2+xx) &
-                  +0.5d0*zPi_NL(:,:,:,iav_t-1)*(xx**2-xx) &
-                  +      zPi_NL(:,:,:,iav_t)*(1d0 - xx**2)
+  zPi_tot(:,:,:,:) = 0.5d0*zPi_NL(:,:,:,:,iav_t+1)*(xx**2+xx) &
+                  +0.5d0*zPi_NL(:,:,:,:,iav_t-1)*(xx**2-xx) &
+                  +      zPi_NL(:,:,:,:,iav_t)*(1d0 - xx**2)
   zPi_tot = zPi_tot + zPi_loc
   do ib = 1,NB_basis
-    zPi_tot(ib,ib,:) = zPi_tot(ib,ib,:) + Act_tmp
+    zPi_tot(ib,ib,:,1) = zPi_tot(ib,ib,:,1) + Act_tmp*Epdir_1(1)
+    zPi_tot(ib,ib,:,2) = zPi_tot(ib,ib,:,2) + Act_tmp*Epdir_1(2)
+    zPi_tot(ib,ib,:,3) = zPi_tot(ib,ib,:,3) + Act_tmp*Epdir_1(3)
   end do
 !== construct current matrix end
 
   do ik = NK_s,NK_e
     zMat_diag(:,:)=zH_tot(:,:,ik)
     call zheev('V', 'U', NB_basis, zMat_diag, NB_basis, w, work_lp, lwork, rwork, info)
-    zdH_tot(:,:,ik) = matmul(zPi_tot(:,:,ik),zMat_diag(:,:))
-    zPi_tot(:,:,ik) = matmul(transpose(conjg(zMat_diag(:,:))),zdH_tot(:,:,ik))
-    zdH_tot(:,:,ik) = zPi_tot(:,:,ik)*Ac_probe_BE(iter+1)*Mask_probe(:,:)
+    zMat_tmp(:,:) = zPi_tot(:,:,ik,1)*Epdir_1(1) &
+                   +zPi_tot(:,:,ik,2)*Epdir_1(2) &
+                   +zPi_tot(:,:,ik,3)*Epdir_1(3)
+
+    zdH_tot(:,:,ik) = matmul(zMat_tmp,zMat_diag(:,:))
+    zMat_tmp(:,:) = matmul(transpose(conjg(zMat_diag(:,:))),zdH_tot(:,:,ik))
+    zdH_tot(:,:,ik) = zMat_tmp(:,:)*Ac_probe_BE(iter+1)*Mask_probe(:,:)
 
     zvec_t(:,:) = matmul(transpose(conjg(zMat_diag(:,:))),zCt(:,:,ik))
 

@@ -19,7 +19,7 @@ subroutine PSE_preparation_matrix
   implicit none
   real(8) :: f0_1,f0_2,omega_1,omega_2,tpulse_1,tpulse_2,T1_T2
   integer :: ik,ib1,ib2,iav
-  complex(8) :: zs
+  complex(8) :: zs, zs_x, zs_y, zs_z
   integer :: ilma,ia,i,j,ix,iy,iz
   complex(8) :: zjx1t,zjx2t,zjx3t,zjxt,zjyt,zjzt
   complex(8) :: uVpsi,uVpsix,uVpsiy,uVpsiz
@@ -33,9 +33,9 @@ subroutine PSE_preparation_matrix
   dAmax = Amax/dble(NAmax)
 
   allocate(zH_loc(NB_basis,NB_basis,NK_s:NK_e))
-  allocate(zPi_loc(NB_basis,NB_basis,NK_s:NK_e))
+  allocate(zPi_loc(NB_basis,NB_basis,NK_s:NK_e,3))
   allocate(zV_NL(NB_basis,NB_basis,NK_s:NK_e,-NAmax:NAmax))
-  allocate(zPi_NL(NB_basis,NB_basis,NK_s:NK_e,-NAmax:NAmax))
+  allocate(zPi_NL(NB_basis,NB_basis,NK_s:NK_e,3,-NAmax:NAmax))
 
   kAc_Cvec(:,:)=kAc0_Cvec(:,:)
   call PSE_pre_hpsi
@@ -59,12 +59,24 @@ subroutine PSE_preparation_matrix
   do ik=NK_s,NK_e
     do ib2=1,NB_basis
       tpsi(:)=zu_basis(:,ib2,ik)
-      call PSE_ppsi(ik)
+      call PSE_ppsi_3d(ik)
       do ib1=ib2,NB_basis
-        zs=sum(conjg(zu_basis(:,ib1,ik))*htpsi(:))*H123
-        zPi_loc(ib1,ib2,ik)=zs
-        zPi_loc(ib2,ib1,ik)=conjg(zs)
-        if(ib1 == ib2) zPi_loc(ib1,ib2,ik)=real(zs)
+!        zs=sum(conjg(zu_basis(:,ib1,ik))*htpsi(:))*H123
+        if(ib1 == ib2) then
+          zPi_loc(ib1,ib2,ik,1)=real(sum(conjg(zu_basis(:,ib1,ik))*pitpsi(:,1))*H123)
+          zPi_loc(ib1,ib2,ik,2)=real(sum(conjg(zu_basis(:,ib1,ik))*pitpsi(:,2))*H123)
+          zPi_loc(ib1,ib2,ik,3)=real(sum(conjg(zu_basis(:,ib1,ik))*pitpsi(:,3))*H123)
+        else
+          zPi_loc(ib1,ib2,ik,1)=sum(conjg(zu_basis(:,ib1,ik))*pitpsi(:,1))*H123
+          zPi_loc(ib2,ib1,ik,1)=conjg(zPi_loc(ib1,ib2,ik,1))
+          
+          zPi_loc(ib1,ib2,ik,2)=sum(conjg(zu_basis(:,ib1,ik))*pitpsi(:,2))*H123
+          zPi_loc(ib2,ib1,ik,2)=conjg(zPi_loc(ib1,ib2,ik,2))
+
+          zPi_loc(ib1,ib2,ik,3)=sum(conjg(zu_basis(:,ib1,ik))*pitpsi(:,3))*H123
+          zPi_loc(ib2,ib1,ik,3)=conjg(zPi_loc(ib1,ib2,ik,3))
+        end if
+
       end do
     end do
   end do
@@ -130,7 +142,10 @@ subroutine PSE_preparation_matrix
           zjyt=A_matrix(2,1)*zjx1t+A_matrix(2,2)*zjx2t+A_matrix(2,3)*zjx3t
           zjzt=A_matrix(3,1)*zjx1t+A_matrix(3,2)*zjx2t+A_matrix(3,3)*zjx3t
 
-          zs = Epdir_1(1)*zjxt + Epdir_1(2)*zjyt+ Epdir_1(3)*zjzt
+!          zs = Epdir_1(1)*zjxt + Epdir_1(2)*zjyt+ Epdir_1(3)*zjzt
+          zs_x = zjxt 
+          zs_y = zjyt
+          zs_z = zjzt
 
 ! <b1| VNL*r | b2>
           zjx1t=0d0;zjx2t=0d0;zjx3t=0d0
@@ -162,10 +177,27 @@ subroutine PSE_preparation_matrix
           zjyt=A_matrix(2,1)*zjx1t+A_matrix(2,2)*zjx2t+A_matrix(2,3)*zjx3t
           zjzt=A_matrix(3,1)*zjx1t+A_matrix(3,2)*zjx2t+A_matrix(3,3)*zjx3t
 
-          zs = zs - (Epdir_1(1)*zjxt + Epdir_1(2)*zjyt+ Epdir_1(3)*zjzt)
-          zPi_NL(ib1,ib2,ik,iav)=zs
-          zPi_NL(ib2,ib1,ik,iav)=conjg(zs)
-          if(ib1 == ib2) zPi_NL(ib1,ib2,ik,iav)=real(zs)
+!          zs = zs - (Epdir_1(1)*zjxt + Epdir_1(2)*zjyt+ Epdir_1(3)*zjzt)
+
+          zs_x = zjxt - zjxt
+          zs_y = zjyt - zjyt
+          zs_z = zjzt - zjzt
+
+!          zPi_NL(ib1,ib2,ik,iav)=zs
+!          zPi_NL(ib2,ib1,ik,iav)=conjg(zs)
+
+          zPi_NL(ib1,ib2,ik,1,iav)=zs_x
+          zPi_NL(ib2,ib1,ik,1,iav)=conjg(zs_x)
+          zPi_NL(ib1,ib2,ik,2,iav)=zs_y
+          zPi_NL(ib2,ib1,ik,2,iav)=conjg(zs_y)
+          zPi_NL(ib1,ib2,ik,3,iav)=zs_z
+          zPi_NL(ib2,ib1,ik,3,iav)=conjg(zs_z)
+
+          if(ib1 == ib2)then
+            zPi_NL(ib1,ib2,ik,1,iav)=real(zs_x)
+            zPi_NL(ib1,ib2,ik,2,iav)=real(zs_y)
+            zPi_NL(ib1,ib2,ik,3,iav)=real(zs_z)
+          end if
 
         end do
       end do
@@ -188,9 +220,9 @@ subroutine PSE_preparation_matrix
     filename="matrix_element/"//trim(cik)//"_matrix_elements.out"
     open(201,file=filename,form='unformatted')
     write(201)zH_loc(:,:,ik)
-    write(201)zPi_loc(:,:,ik)
+    write(201)zPi_loc(:,:,ik,:)
     write(201)zV_NL(:,:,ik,:)
-    write(201)zPi_NL(:,:,ik,:)
+    write(201)zPi_NL(:,:,ik,:,:)
     close(201)
   end do
 

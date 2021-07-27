@@ -18,19 +18,24 @@ subroutine BE_matrix_element_for_dielectric_function
   use global_variables
   implicit none
   real(8),allocatable :: Pz2(:,:)
+  complex(8),allocatable :: zmat_tmp(:,:)
   integer :: ik,ib1,ib2
   character(99) :: cik,filename
 
   if(myrank == 0)write(*,"(A)")"== Start: Matrix-element for dielectric function."
 
-  allocate(Pz2(NB_basis,NB_basis))
-  zPi_tot(:,:,:) =  zPi_loc(:,:,:) + zPi_NL(:,:,:,0)
+  allocate(Pz2(NB_basis,NB_basis),zmat_tmp(NB_basis,NB_basis))
+  zPi_tot(:,:,:,:) =  zPi_loc(:,:,:,:) + zPi_NL(:,:,:,:,0)
 
   do ik = NK_s,NK_e
+    zmat_tmp = zPi_tot(:,:,:,1)*Epdir_1(1) &
+              +zPi_tot(:,:,:,2)*Epdir_1(2) &
+              +zPi_tot(:,:,:,3)*Epdir_1(3)
 
     do ib1=1,NB_basis
       do ib2=ib1,NB_basis
-        zACt_tmp(:) = matmul(zPi_tot(:,:,ik),zC_eig(:,ib2,ik))
+
+        zACt_tmp(:) = matmul(zmat_tmp(:,:),zC_eig(:,ib2,ik))
         Pz2(ib1,ib2) = abs(sum(conjg(zC_eig(:,ib1,ik))*zACt_tmp(:)))**2
         Pz2(ib2,ib1) = Pz2(ib1,ib2)
       end do
