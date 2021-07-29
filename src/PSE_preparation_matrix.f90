@@ -179,9 +179,9 @@ subroutine PSE_preparation_matrix
 
 !          zs = zs - (Epdir_1(1)*zjxt + Epdir_1(2)*zjyt+ Epdir_1(3)*zjzt)
 
-          zs_x = zjxt - zjxt
-          zs_y = zjyt - zjyt
-          zs_z = zjzt - zjzt
+          zs_x = zs_x - zjxt
+          zs_y = zs_y - zjyt
+          zs_z = zs_z - zjzt
 
 !          zPi_NL(ib1,ib2,ik,iav)=zs
 !          zPi_NL(ib2,ib1,ik,iav)=conjg(zs)
