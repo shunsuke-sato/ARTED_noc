@@ -56,12 +56,14 @@ subroutine MS_current(jt_m_out,Ac_m_in)
   if(iav_t == -NAmax)iav_t=-NAmax +1
 
   xx = (Act_t-dble(iav_t)*dAmax)/dAmax
-  zPi_tot(:,:,:) = 0.5d0*zPi_NL(:,:,:,iav_t+1)*(xx**2+xx) &
-                  +0.5d0*zPi_NL(:,:,:,iav_t-1)*(xx**2-xx) &
-                  +      zPi_NL(:,:,:,iav_t)*(1d0 - xx**2)
+  zPi_tot(:,:,:,:) = 0.5d0*zPi_NL(:,:,:,:,iav_t+1)*(xx**2+xx) &
+                  +0.5d0*zPi_NL(:,:,:,:,iav_t-1)*(xx**2-xx) &
+                  +      zPi_NL(:,:,:,:,iav_t)*(1d0 - xx**2)
   zPi_tot = zPi_tot + zPi_loc
   do ib = 1,NB_basis
-    zPi_tot(ib,ib,:) = zPi_tot(ib,ib,:) + Act_t
+    zPi_tot(ib,ib,:,1) = zPi_tot(ib,ib,:,1) + Act_t*Epdir_1(1)
+    zPi_tot(ib,ib,:,2) = zPi_tot(ib,ib,:,2) + Act_t*Epdir_1(2)
+    zPi_tot(ib,ib,:,3) = zPi_tot(ib,ib,:,3) + Act_t*Epdir_1(3)
   end do
 !== construct current matrix end
 
@@ -69,7 +71,10 @@ subroutine MS_current(jt_m_out,Ac_m_in)
 !$omp parallel do private(ik, ib, zvec0) reduction(+:jav_l)
   K_point : do ik=NK_s,NK_e
 
-    zvec0(1:NB_basis, 1:NB_TD) = matmul(zPi_tot(:,:,ik),zCt_Mpoint(:,1:NB_TD,ik, ix_m))
+    zvec0(1:NB_basis, 1:NB_TD) = matmul(zPi_tot(:,:,ik,1)*Epdir_1(1) &
+                                       +zPi_tot(:,:,ik,2)*Epdir_1(2) &
+                                       +zPi_tot(:,:,ik,3)*Epdir_1(3) &
+      ,zCt_Mpoint(:,1:NB_TD,ik, ix_m))
     Band : do ib=1,NB_TD
       jav_l = jav_l + occ(ib,ik)*sum(conjg(zCt_Mpoint(:,ib,ik,ix_m))*zvec0(:, ib))
     end do Band

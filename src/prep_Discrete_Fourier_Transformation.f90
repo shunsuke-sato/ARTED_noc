@@ -28,7 +28,7 @@ subroutine prep_Discrete_Fourier_Transformation
 
   allocate(exp_x1(0:NL1-1,0:NL1-1),exp_x2(0:NL2-1,0:NL2-1),exp_x3(0:NL3-1,0:NL3-1))
   allocate(cexp_x1(0:NL1-1,0:NL1-1),cexp_x2(0:NL2-1,0:NL2-1),cexp_x3(0:NL3-1,0:NL3-1))
-  allocate(zft1(0:NL1-1,0:NL2-1,0:NL3-1),zft2(0:NL1-1,0:NL2-1,0:NL3-1),zft3(0:NL1-1,0:NL2-1,0:NL3-1))
+  allocate(zft1(0:NL1-1,0:NL2-1,0:NL3-1),zft2(0:NL1-1,0:NL2-1,0:NL3-1),zft3(0:NL1-1,0:NL2-1,0:NL3-1),zft4(0:NL1-1,0:NL2-1,0:NL3-1))
   allocate(Lap_k(0:NL1-1,0:NL2-1,0:NL3-1),InLap_k(0:NL1-1,0:NL2-1,0:NL3-1))
   allocate(Grad_x_zI(0:NL1-1,0:NL2-1,0:NL3-1),Grad_y_zI(0:NL1-1,0:NL2-1,0:NL3-1),Grad_z_zI(0:NL1-1,0:NL2-1,0:NL3-1))
 

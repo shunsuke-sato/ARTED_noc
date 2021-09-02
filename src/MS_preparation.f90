@@ -94,11 +94,11 @@ subroutine MS_preparation
   end if
 
   allocate(zH_loc(NB_basis,NB_basis,NK_s:NK_e))
-  allocate(zPi_loc(NB_basis,NB_basis,NK_s:NK_e))
+  allocate(zPi_loc(NB_basis,NB_basis,NK_s:NK_e,3))
   allocate(zV_NL(NB_basis,NB_basis,NK_s:NK_e,-NAmax:NAmax))
-  allocate(zPi_NL(NB_basis,NB_basis,NK_s:NK_e,-NAmax:NAmax))
+  allocate(zPi_NL(NB_basis,NB_basis,NK_s:NK_e,3,-NAmax:NAmax))
   allocate(zH_tot(NB_basis,NB_basis,NK_s:NK_e))
-  allocate(zPi_tot(NB_basis,NB_basis,NK_s:NK_e))
+  allocate(zPi_tot(NB_basis,NB_basis,NK_s:NK_e,3))
   allocate(zH0_tot(NB_basis,NB_basis,NK_s:NK_e))
   allocate(zdH_tot(NB_basis,NB_basis,NK_s:NK_e))
   allocate(H0_eigval(NB_basis,NK_s:NK_e))
@@ -107,9 +107,9 @@ subroutine MS_preparation
     filename="matrix_element/"//trim(cik)//"_matrix_elements.out"
     open(201,file=filename,form='unformatted')
     read(201)zH_loc(:,:,ik)
-    read(201)zPi_loc(:,:,ik)
+    read(201)zPi_loc(:,:,ik,:)
     read(201)zV_NL(:,:,ik,:)
-    read(201)zPi_NL(:,:,ik,:)
+    read(201)zPi_NL(:,:,ik,:,:)
     close(201)
   end do
 

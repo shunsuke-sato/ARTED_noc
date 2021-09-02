@@ -34,3 +34,25 @@ subroutine PSE_ppsi(ik)
 
   return
 end subroutine PSE_ppsi
+!-----------------------------------------------------------------
+subroutine PSE_ppsi_3d(ik)
+  use global_variables
+  use PSE_variables
+  implicit none
+  integer :: ik
+
+
+  select case(type_spatial_difference)
+  case('FD')
+    err_message = 'type_spatial_difference=FD is not available for ppsi'
+    call err_finalize
+  case('FT')
+    call PSE_ppsi_DFT_3d(ik)
+  case default
+    err_message = 'invalid parameter in type_spatial_difference'
+    call err_finalize
+  end select
+
+
+  return
+end subroutine PSE_ppsi_3d

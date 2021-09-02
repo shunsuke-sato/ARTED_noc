@@ -73,6 +73,7 @@ module global_variables
   real(8),allocatable :: occ_TD(:,:),occ_TD_l(:,:)
   complex(8),allocatable :: zu(:,:,:),zu_GS(:,:,:),zu_GS0(:,:,:)
   complex(8),allocatable :: tpsi(:),htpsi(:),tpsi_g1(:),tpsi_g2(:)
+  complex(8),allocatable :: pitpsi_3d(:,:)
 
 ! density, potential
   real(8),allocatable :: rho_c(:),rho_p(:),rho_e(:),rho_e_l(:)
@@ -119,7 +120,7 @@ module global_variables
 
 ! Discrete Fourier Transformation
   complex(8),allocatable :: exp_x1(:,:),exp_x2(:,:),exp_x3(:,:),cexp_x1(:,:),cexp_x2(:,:),cexp_x3(:,:)
-  complex(8),allocatable :: zft1(:,:,:),zft2(:,:,:),zft3(:,:,:)
+  complex(8),allocatable :: zft1(:,:,:),zft2(:,:,:),zft3(:,:,:),zft4(:,:,:)
   real(8),allocatable :: Lap_k(:,:,:),InLap_k(:,:,:),Grad_x_zI(:,:,:),Grad_y_zI(:,:,:),Grad_z_zI(:,:,:)
 
 ! Conjugate Gradient calculation
@@ -146,14 +147,14 @@ module global_variables
   integer :: NB_basis, NK_shift, NB_basis_main,NB_basis_shift
   real(8),allocatable :: kshift(:,:)
   complex(8),allocatable :: zu_basis(:,:,:)
-  complex(8),allocatable :: zH_loc(:,:,:),zPi_loc(:,:,:)
-  complex(8),allocatable :: zV_NL(:,:,:,:),zPi_NL(:,:,:,:)
-  complex(8),allocatable :: zH_tot(:,:,:),zPi_tot(:,:,:)
+  complex(8),allocatable :: zH_loc(:,:,:),zPi_loc(:,:,:,:)
+  complex(8),allocatable :: zV_NL(:,:,:,:),zPi_NL(:,:,:,:,:)
+  complex(8),allocatable :: zH_tot(:,:,:),zPi_tot(:,:,:,:)
   complex(8),allocatable :: zH0_tot(:,:,:),zdH_tot(:,:,:)
   real(8),allocatable :: H0_eigval(:,:)
   integer,parameter :: NAmax = 20
   real(8) :: Amax,dAmax
-  real(8),allocatable :: Actot_BE(:),javt_BE(:)
+  real(8),allocatable :: Actot_BE(:),javt_BE(:,:)
 
   complex(8),allocatable :: zCt(:,:,:),zCt_tmp(:,:,:),zACt_tmp(:),ztCt_tmp(:)
   complex(8),allocatable :: zC_eig(:,:,:)

@@ -21,6 +21,7 @@ subroutine pre_allocation
 
   allocate(zu(NL,NB_TD,NK_s:NK_e),zu_GS(NL,NB,NK_s:NK_e),zu_GS0(NL,NB,NK_s:NK_e))
   allocate(tpsi(NL),htpsi(NL),tpsi_g1(NL),tpsi_g2(NL))
+  allocate(pitpsi_3d(NL,3))
   allocate(rho_c(NL),rho_p(NL),rho_e(NL),rho_e_l(NL))
   allocate(rho_c_3D(0:NL1-1,0:NL2-1,0:NL3-1))
   allocate(Vloc(NL),Vh(NL),Vxc(NL),Exc(NL))
