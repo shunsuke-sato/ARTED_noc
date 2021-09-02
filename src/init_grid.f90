@@ -19,6 +19,7 @@ subroutine init_grid
   integer :: i,j
   real(8) :: tvec(3)
   integer :: i1,i2,i3
+  integer :: n1,n2,n3
 
   NL=NL1*NL2*NL3
   NK=NK1*NK2*NK3
@@ -110,15 +111,22 @@ subroutine init_grid
 !            &+Lx(3,i)*a_Cvec(3,3)
 !  end do
 
-  
+
+! Monkhorst-Pack k-point sampling  
   i=0
   do i1=0,NK1-1
+    n1 = i1+1
     do i2=0,NK2-1
+      n2 = i2 + 1
       do i3=0,NK3-1
+        n3 = i3 + 1
         i=i+1
-        kAc0_Rvec(1,i)=dble(i1)*dk1-dk1*(dble(NK1/2)-0.5d0)
-        kAc0_Rvec(2,i)=dble(i2)*dk2-dk2*(dble(NK2/2)-0.5d0)
-        kAc0_Rvec(3,i)=dble(i3)*dk3-dk3*(dble(NK3/2)-0.5d0)
+!        kAc0_Rvec(1,i)=dble(i1)*dk1-dk1*(dble(NK1/2)-0.5d0)
+!        kAc0_Rvec(2,i)=dble(i2)*dk2-dk2*(dble(NK2/2)-0.5d0)
+!        kAc0_Rvec(3,i)=dble(i3)*dk3-dk3*(dble(NK3/2)-0.5d0)
+        kAc0_Rvec(1,i)=dble(2*n1-NK1-1)/(2*NK1)
+        kAc0_Rvec(2,i)=dble(2*n2-NK2-1)/(2*NK2)
+        kAc0_Rvec(3,i)=dble(2*n3-NK3-1)/(2*NK3)
       end do
     end do
   end do
