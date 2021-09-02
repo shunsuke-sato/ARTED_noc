@@ -166,4 +166,16 @@ module global_variables
   logical,parameter :: switch_Houston_probe_decomposition = .false. !! .true.
   real(8),allocatable :: Ac_pump_BE(:),Ac_probe_BE(:)
   real(8),allocatable :: Mask_probe(:,:)
+
+! global flags
+  logical :: if_update_vloc_in_GS_calc
+
+  contains
+    subroutine set_all_global_flags_to_default
+      implicit none
+
+      if_update_vloc_in_GS_calc = .true.
+
+
+    end subroutine set_all_global_flags_to_default
 end Module Global_Variables

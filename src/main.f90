@@ -40,6 +40,16 @@ program main
       write(99)Vloc
       close(99)
     end if
+  case('UNOCC') ! unoccupied states with frozen vloc 
+    if_update_vloc_in_GS_calc = .false.
+    if(myrank == 0)then
+      open(99,file="Vloc_gs.out",form='unformatted')
+      read(99)Vloc
+      close(99)
+    end if
+    call MPI_BCAST(Vloc,NL,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
+
+    call PSE_ground_state_calculation
   case('MS') ! Matrix element preparation
     if(myrank == 0)then
       open(99,file="Vloc_gs.out",form='unformatted')

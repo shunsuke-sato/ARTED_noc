@@ -57,9 +57,15 @@ subroutine PSE_ground_state_calculation
     if(cEex_Cor_tmp == 'TBmBJ'.and. iter_scf < 20)cEex_Cor = 'PZ'
     call Exc_Cor
     cEex_Cor = cEex_Cor_tmp
-    call local_potential
-    Vloc = rmix*Vloc + (1d0-rmix)*Vloc_old
-    Vloc_old = Vloc
+
+    if(if_update_vloc_in_GS_calc)then
+      call local_potential
+      Vloc = rmix*Vloc + (1d0-rmix)*Vloc_old
+      Vloc_old = Vloc
+    else
+      Vloc = Vloc_old
+    end if
+
     call PSE_current_GS(jav)
 
     call PSE_energy(Etot,Ekin,'GS')
@@ -90,6 +96,9 @@ subroutine PSE_ground_state_calculation
   call Hartree
   call Exc_Cor
   call local_potential
+  if(.not.if_update_vloc_in_GS_calc)then
+    Vloc = Vloc_old
+  end if
   call PSE_current_GS(jav)
 
   call PSE_energy(Etot,Ekin,'GS')
