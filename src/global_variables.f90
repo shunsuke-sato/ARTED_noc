@@ -89,6 +89,7 @@ module global_variables
   integer,allocatable :: Zatom(:),Kion(:)
   real(8),allocatable :: Rion_Lvec(:,:)
   real(8),allocatable :: occ(:,:)
+  real(8) :: Telec, mu_elec
 
 ! GS parameter
   integer :: Ncg,Nscf

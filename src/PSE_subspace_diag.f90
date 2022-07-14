@@ -56,6 +56,7 @@ subroutine PSE_subspace_diag
 
 
   call MPI_ALLREDUCE(esp_l,esp,NB*NK,MPI_REAL8,MPI_SUM,MPI_COMM_WORLD,ierr)
+  
 
   return
 end subroutine PSE_subspace_diag
