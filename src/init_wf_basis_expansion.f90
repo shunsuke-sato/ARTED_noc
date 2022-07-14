@@ -36,6 +36,7 @@ subroutine init_wf_basis_expansion
   allocate(zLanCt(NB_basis,NB_TD,NLanczos))
   allocate(ztCt_Lan(NB_basis,NB_TD),zACt_Lan(NB_basis,NB_TD))
 
+  esp_l = 0d0
   do ik = NK_s,NK_e
     zMat_diag(:,:)=zH_loc(:,:,ik)+zV_NL(:,:,ik,0)
     zH0_tot(:,:,ik) = zMat_diag(:,:)
@@ -43,8 +44,11 @@ subroutine init_wf_basis_expansion
     zCt(1:NB_basis,1:NB_TD,ik)=zMat_diag(1:NB_basis,1:NB_TD)
     zC_eig(:,:,ik) = zMat_diag(:,:)
     H0_eigval(:,ik) = w(:)
+    esp_l(1:NB,ik) = w(1:NB)
   end do
+  call MPI_ALLREDUCE(esp_l,esp,NB*NK,MPI_REAL8,MPI_SUM,MPI_COMM_WORLD,ierr)
 
+  call occupation_Fermi_Dirac_dist
   if(myrank == 0)write(*,"(A)")"== End: Initialization of wavefunctions."
 
   return

@@ -17,7 +17,11 @@ subroutine pre_allocation
   use global_variables
   implicit none
 
-  NB_TD=Nelec/2
+  if(Telec <= 0d0)then
+    NB_TD=Nelec/2
+  else
+    NB_TD = NB
+  end if
 
   allocate(zu(NL,NB_TD,NK_s:NK_e),zu_GS(NL,NB,NK_s:NK_e),zu_GS0(NL,NB,NK_s:NK_e))
   allocate(tpsi(NL),htpsi(NL),tpsi_g1(NL),tpsi_g2(NL))
