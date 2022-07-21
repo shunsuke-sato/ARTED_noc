@@ -60,7 +60,7 @@ subroutine preparation
     read(*,*) Time_shoutdown
     read(*,*) SYSname
     read(*,*) cEex_Cor,cVal_mBJ
-    read(*,*) Telec
+    read(*,*) Telec, mu_elec
     read(*,*) ps_format 
     read(*,*) method, type_spatial_difference
     read(*,*) a_Cvec_d(1,1),a_Cvec_d(2,1),a_Cvec_d(3,1)
@@ -85,7 +85,7 @@ subroutine preparation
     write(*,'(A,2x,e16.6e3)') 'Time_shoutdown = ',Time_shoutdown
     write(*,'(A,2x,A)') 'SYSname = ',SYSname
     write(*,'(A,2x,A,2x,e16.6e3)') 'cEex_Cor, ,cVal_mBJ = ',cEex_Cor,cVal_mBJ
-    write(*,'(A,2x,e16.6e3)') 'Telec = ',Telec
+    write(*,'(A,2x,2e16.6e3)') 'Telec, mu_elec = ',Telec, mu_elec
     write(*,*) 'ps_format =',ps_format 
     write(*,'(A,2x,A,2x,A)') 'method, type_spatial_difference',method, type_spatial_difference
     write(*,'(A,2x,3e16.6E3)') 'a_Cvec_d(1,1),a_Cvec_d(2,1),a_Cvec_d(3,1) = ',a_Cvec_d(1,1),a_Cvec_d(2,1),a_Cvec_d(3,1)
@@ -115,6 +115,7 @@ subroutine preparation
   call MPI_BCAST(cEex_Cor,10,MPI_CHARACTER,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(cVal_mBJ,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(Telec,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
+  call MPI_BCAST(mu_elec,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(ps_format,10,MPI_CHARACTER,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(method,3,MPI_CHARACTER,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(type_spatial_difference,2,MPI_CHARACTER,0,MPI_COMM_WORLD,ierr)
