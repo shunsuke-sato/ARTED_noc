@@ -29,27 +29,42 @@ subroutine occupation_Fermi_Dirac_dist
 
   if(myrank == 0)then
 
-    do
+    if(mu_elec == 0d0)then
+
+      do
+        mu = 0.5d0*(mu_max + mu_min)
+        occ = (2d0/NK)/(exp(beta*(esp-mu))+1d0)
+        num_elec_t = sum(occ)
+        if(num_elec_t > real(Nelec))then
+          mu_max = mu
+        else
+          mu_min = mu
+        end if
+        
+        if(mu_max - mu_min < 1d-10)exit
+
+      end do
+
       mu = 0.5d0*(mu_max + mu_min)
       occ = (2d0/NK)/(exp(beta*(esp-mu))+1d0)
-      num_elec_t = sum(occ)
-      if(num_elec_t > real(Nelec))then
-        mu_max = mu
-      else
-        mu_min = mu
-      end if
 
-      if(mu_max - mu_min < 1d-10)exit
+    else
 
-    end do
-
-    mu = 0.5d0*(mu_max + mu_min)
-    occ = (2d0/NK)/(exp(beta*(esp-mu))+1d0)
+      mu = mu_elec
+      occ = (2d0/NK)/(exp(beta*(esp-mu))+1d0)
+    end if
 
 
   end if
 
   call MPI_BCAST(occ,NB*NK,MPI_REAL8,0,MPI_COMM_WORLD,ierr)  
+
+
+  if(myrank == 0)then
+    num_elec_t = sum(occ) - Nelec
+    write(*,"(A,2x,e26.16e3)")"Num. of excess electrons per cell =",num_elec_t
+    write(*,"(A,2x,e26.16e3)")"Chemical potential =",mu
+  end if
 
   return
 end subroutine occupation_Fermi_Dirac_dist
