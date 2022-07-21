@@ -56,8 +56,8 @@ subroutine BE_dt_evolve(Act_t)
     zH_tot(ib,ib,:) = zH_tot(ib,ib,:) + 0.5d0*Act_t**2
   end do
 
-  call BE_dt_full_evolve_Taylor
-!  call BE_dt_full_evolve_Krylov_exact_diag
+!  call BE_dt_full_evolve_Taylor
+  call BE_dt_full_evolve_Krylov_exact_diag
 
 contains
 
