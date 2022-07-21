@@ -41,6 +41,7 @@ subroutine PSE_ground_state_calculation
     call PSE_Conjugate_Gradient(Ncg)
     call Gram_Schmidt
     call PSE_subspace_diag
+    call occupation_Fermi_Dirac_dist
     call Gram_Schmidt
 
     call psi_rho('GS')
