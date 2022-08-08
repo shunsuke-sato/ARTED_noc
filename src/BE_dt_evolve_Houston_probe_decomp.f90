@@ -137,27 +137,111 @@ subroutine BE_dt_evolve_Houston_probe_decomp(iter,Act_t)
   end do
 
 
-  if(abs(Act_t) < eps_Act)then
-    zdH_tot(:,:,:) = zH_tot(:,:,:) - (zH_loc(:,:,:) + zV_NL(:,:,:,0))
-    call BE_dt_half_evolve_Taylor
-!  call BE_dt_half_evolve_Lanczos
-    call BE_dt_evolve_Free
-    call BE_dt_half_evolve_Taylor
-!  call BE_dt_half_evolve_Lanczos
-  else
-    zCt_tmp = zCt
-    call BE_dt_full_evolve_Lanczos(ierr_lan)
-    if(ierr_lan /= 0)then
-      zCt = zCt_tmp
-      zdH_tot(:,:,:) = zH_tot(:,:,:) - (zH_loc(:,:,:) + zV_NL(:,:,:,0))
-      call BE_dt_half_evolve_Taylor
-      call BE_dt_evolve_Free
-      call BE_dt_half_evolve_Taylor
-
-    end if
-  end if
+  call BE_dt_full_evolve_Krylov_exact_diag
 
   return
+contains
+  subroutine BE_dt_full_evolve_Krylov_exact_diag
+    implicit none
+    integer,parameter :: nvec = 16
+    complex(8) :: zvec(NB_basis, NB_TD, nvec)
+    complex(8) :: zhvec(NB_basis, NB_TD, nvec)
+    complex(8) :: zham_m(nvec, nvec),zUprop_m(nvec, nvec)
+    integer :: ib, ivec, jvec, ik
+    real(8) :: ss
+    complex(8) :: zs
+!LAPACK
+    integer :: lwork
+    complex(8),allocatable :: work_lp(:)
+    real(8),allocatable :: rwork(:),w(:)
+    integer :: info
+
+    lwork=6*nvec+128
+    allocate(work_lp(lwork),rwork(3*nvec-2),w(nvec))
+      
+    K_point : do ik=NK_s,NK_e
+
+      zvec(1:NB_basis,1:NB_TD,1) = zCt(1:NB_basis, 1:NB_TD, ik)
+!normalize
+      do ib = 1, nb_td
+        ss = sum(abs(zvec(:,ib,1))**2); ss = 1d0/sqrt(ss)
+        zvec(:,ib,1)=zvec(:,ib,1)*ss
+      end do
+
+!Construction of Krylov subspace
+      do ivec = 1, nvec
+
+        call zhemm('L', 'U', NB_basis, NB_TD, (1d0,0d0), &
+            zH_tot(1:NB_basis,1:NB_basis,ik), &
+            NB_basis,&
+            zvec(1:NB_basis,1:NB_TD, ivec), &
+            NB_basis, (0d0,0d0), &
+            zhvec(1:NB_basis,1:NB_TD,ivec), &
+            NB_basis)
+        
+        if(ivec /= nvec)then
+          do ib = 1, nb_td
+            ss = sum(conjg(zvec(:,ib,ivec))*zhvec(:,ib,ivec))
+            zvec(:,ib,ivec+1) = zhvec(:,ib,ivec)-ss*zvec(:,ib,ivec)
+            ss = sum(abs(zvec(:,ib,ivec+1))**2)
+            if(ss == 0d0)then
+              write(*,"(A)")'Warning: (a) linear dependency in BE_dt_full_evolve_Krylov_exact_diag'
+              zvec(:,ib,ivec+1)=1d0/sqrt(dble(NB_basis))
+            else
+              ss = 1d0/sqrt(ss)
+              zvec(:,ib,ivec+1)=zvec(:,ib,ivec+1)*ss
+            end if
+          end do
+
+!Gram-Schmidt orthonormalization
+          do ib = 1, nb_td
+            do jvec = 1, ivec
+              zs = sum(conjg(zvec(:,ib,jvec))*zvec(:,ib,ivec+1))
+              zvec(:,ib,ivec+1) = zvec(:,ib,ivec+1) -zs*zvec(:,ib,jvec)
+            end do
+            ss = sum(abs(zvec(:,ib,ivec+1))**2)
+            if(ss == 0d0)then
+              write(*,"(A)")'Warning: (b) linear dependency in BE_dt_full_evolve_Krylov_exact_diag'
+              stop
+            end if
+            ss = 1d0/sqrt(ss)
+            zvec(:,ib,ivec+1)=zvec(:,ib,ivec+1)*ss
+          end do
+          
+        end if
+
+      end do
+
+      
+      do ib = 1, nb_td
+        do ivec = 1, nvec
+          zham_m(ivec,ivec) = sum( conjg(zhvec(:,ib,ivec))*zvec(:,ib,ivec))
+          do jvec = ivec+1, nvec
+            zham_m(ivec,jvec) = sum( conjg(zhvec(:,ib,ivec))*zvec(:,ib,jvec))
+            zham_m(jvec,ivec) = conjg(zham_m(ivec,jvec))
+          end do
+        end do
+        
+!diag
+        call zheev('V', 'U', nvec, zham_m, nvec, w, work_lp, lwork, rwork, info)
+
+        zUprop_m = 0d0
+        do ivec = 1, nvec
+          zUprop_m(ivec, ivec) = exp(-zi*dt*w(ivec))
+        end do
+        zUprop_m = matmul(matmul(zham_m,zUprop_m),conjg(transpose(zham_m)))
+        zCt(1:NB_basis, ib, ik) = zvec(:,ib,1)*zUprop_m(1,1)
+        do ivec = 2, nvec
+          zCt(1:NB_basis, ib, ik) = &
+              zCt(1:NB_basis, ib, ik) + zvec(:,ib,ivec)*zUprop_m(ivec,1)
+        end do
+        
+      end do
+
+
+    end do K_point
+
+  end subroutine BE_dt_full_evolve_Krylov_exact_diag
 end subroutine BE_dt_evolve_Houston_probe_decomp
 
 subroutine BE_dt_evolve_Free
