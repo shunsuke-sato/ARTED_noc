@@ -17,7 +17,7 @@ subroutine pre_allocation_ms
   use global_variables
   implicit none
 
-  NB_TD=Nelec/2
+!  NB_TD=Nelec/2
 
   allocate(occ(NB,NK),esp(NB,NK),esp_l(NB,NK))
   allocate(occ_TD(NB,NK),occ_TD_l(NB,NK))

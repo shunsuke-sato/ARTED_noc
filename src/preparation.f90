@@ -69,7 +69,7 @@ subroutine preparation
     read(*,*) aL,aL1,aL2,aL3
     read(*,*) NL1,NL2,NL3
     read(*,*) NK1,NK2,NK3
-    read(*,*) NB,Nelec
+    read(*,*) NB,Nelec,NB_TD
     read(*,*) Ncg,Nscf
     read(*,*) Nt,dt,Npred_corr
     read(*,*) option_TD_band_dos,Nstep_TD_band_dos
@@ -94,7 +94,7 @@ subroutine preparation
     write(*,'(A,2x,4e16.6E3)') 'aL,aL1,aL2,aL3 = ',aL,aL1,aL2,aL3
     write(*,'(A,4(2x,I0))') 'NL1,NL2,NL3 = ',NL1,NL2,NL3
     write(*,'(A,4(2x,I0))') 'NK1,NK2,NK3 = ',NK1,NK2,NK3
-    write(*,'(A,2(2x,I0))') 'NB,Nelec = ',NB,Nelec
+    write(*,'(A,3(2x,I0))') 'NB,Nelec = ',NB,Nelec,NB_TD
     write(*,'(A,2(2x,I0))') 'Ncg,Nscf = ',Ncg,Nscf
     write(*,'(A,2x,I0,2x,e16.6e3)') 'Nt,dt = ',Nt,dt
     write(*,'(A,2x,A,2x,I6)')'option_TD_band_dos,Nstep_TD_band_dos = ',option_TD_band_dos,Nstep_TD_band_dos
@@ -132,6 +132,7 @@ subroutine preparation
   call MPI_BCAST(NK3,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(NB,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(Nelec,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+  call MPI_BCAST(NB_TD,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(Ncg,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(Nscf,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(Nt,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
