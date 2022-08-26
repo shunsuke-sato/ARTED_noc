@@ -17,7 +17,7 @@ subroutine PSE_real_time_propagation_basis_expansion
   use global_variables
   implicit none
   integer :: iter,iter_t
-  real(8) :: jav(3),Act_t,jag_gs(3)
+  real(8) :: jav(3),Act_t,jav_gs(3)
 
   if(myrank == 0)write(*,"(A)")"== Start real-time propagation with basis expansion."
 
