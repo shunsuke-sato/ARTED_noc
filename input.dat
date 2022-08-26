@@ -12,6 +12,7 @@
 6.74d0  0.5  0.5  0.5  ! Ref. Semiconductors, Data handbook, aL,aL1,aL2,aL3,
 12 12 12                           ! NL1,NL2,NL3
 4  4 4                             ! NK1,NK2,NK3
+0d0 0d0 0d0                        ! dkshift(1:3)
 8  8  4                                ! NB,Nelec, NB_TD (# of bands, # of electrons)
 5  300                              ! Ncg ,Nscf (# of CG method,# of ground state iteration)
 8000  0.08  0                        ! Nt,dt,Npred_corr real-time parameter

@@ -50,6 +50,7 @@ module global_variables
 ! grid
   integer :: NL1,NL2,NL3,NL
   integer :: NK1,NK2,NK3,NK
+  real(8) :: dkshift(3)
   real(8) :: a_Cvec(3,3),a_Cvec_d(3,3),b_Cvec(3,3)
   real(8) :: norm_a_Cvec(3),norm_b_Cvec(3)
   real(8) :: mat_vv_a_Cvec(3,3)
