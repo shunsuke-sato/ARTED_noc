@@ -116,9 +116,9 @@ subroutine init_grid
     do i2=0,NK2-1
       do i3=0,NK3-1
         i=i+1
-        kAc0_Rvec(1,i)=dble(i1)*dk1-dk1*(dble(NK1/2)-0.5d0)
-        kAc0_Rvec(2,i)=dble(i2)*dk2-dk2*(dble(NK2/2)-0.5d0)
-        kAc0_Rvec(3,i)=dble(i3)*dk3-dk3*(dble(NK3/2)-0.5d0)
+        kAc0_Rvec(1,i)=dble(i1)*dk1-dk1*(dble(NK1/2)-0.5d0 + dkshift(1))
+        kAc0_Rvec(2,i)=dble(i2)*dk2-dk2*(dble(NK2/2)-0.5d0 + dkshift(2))
+        kAc0_Rvec(3,i)=dble(i3)*dk3-dk3*(dble(NK3/2)-0.5d0 + dkshift(3))
       end do
     end do
   end do
