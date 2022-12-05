@@ -56,15 +56,15 @@ subroutine PSE_read_matrix_elements
   allocate(H0_eigval(NB_basis,NK_s:NK_e))
 
   if(myrank == 0)then
-     filename="matrix_element/matrix_elements.out"
-     open(201,file=filename,form='unformatted')
-     do ik = NK_s,NK_e
-        read(201)zH_loc(:,:,ik)
-        read(201)zPi_loc(:,:,ik,:)
-        read(201)zV_NL(:,:,ik,:)
-        read(201)zPi_NL(:,:,ik,:,:)
-     end do
-  end do
+    filename="matrix_element/matrix_elements.out"
+    open(201,file=filename,form='unformatted')
+    do ik = NK_s,NK_e
+      read(201)zH_loc(:,:,ik)
+      read(201)zPi_loc(:,:,ik,:)
+      read(201)zV_NL(:,:,ik,:)
+      read(201)zPi_NL(:,:,ik,:,:)
+    end do
+  end if
 
   do iproc = 1, Nprocs-1
      if(myrank == iproc)then
