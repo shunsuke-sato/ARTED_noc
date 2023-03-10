@@ -245,7 +245,7 @@ contains
 
   end subroutine BE_dt_full_evolve_Krylov_exact_diag
 
-end subroutine BE_dt_evolve_Houston_probe_decomp
+end subroutine BE_dt_evolve_Houston_probe_decomp_pump_intra_only
 
 subroutine BE_half_dt_evolution_only_with_intraband(act_1, act_2)
   use global_variables
@@ -253,7 +253,12 @@ subroutine BE_half_dt_evolution_only_with_intraband(act_1, act_2)
   real(8),intent(in) :: act_1, act_2
   real(8) :: Act_tmp
   complex(8),allocatable :: zH_tot_1(:,:,:), zH_tot_2(:,:,:)
-  complex(8),allocatable :: zvec(NB_basis, NB_TD)
+  complex(8),allocatable :: zvec(:,:)
+  real(8) :: diff,xx
+  integer :: ib, ib2, ik
+  integer :: iav, iav_t
+  real(8) :: phi
+  complex(8) :: zs
 !LAPACK
   integer :: lwork
   complex(8),allocatable :: work_lp(:)
@@ -267,11 +272,10 @@ subroutine BE_half_dt_evolution_only_with_intraband(act_1, act_2)
   allocate(w1(NB_basis),w2(NB_basis))
   allocate(zMat_diag_1(NB_basis,NB_basis))
   allocate(zMat_diag_2(NB_basis,NB_basis))
-  allocate(zMat_tmp(NB_basis,NB_basis))
     
   allocate(zH_tot_1(NB_basis,NB_basis,NK_s:NK_e))
   allocate(zH_tot_2(NB_basis,NB_basis,NK_s:NK_e))
-
+  allocate(zvec(NB_basis, NB_TD))
 
 !== act_1 start ==
   Act_tmp = act_1
@@ -304,7 +308,7 @@ subroutine BE_half_dt_evolution_only_with_intraband(act_1, act_2)
                                      +zPi_loc(:,:,:,2)*Epdir_1(2) &
                                      +zPi_loc(:,:,:,3)*Epdir_1(3) )
   do ib = 1,NB_basis
-    zH_tot_1(ib,ib,:) = zH_1_tot(ib,ib,:) + 0.5d0*Act_tmp**2
+    zH_tot_1(ib,ib,:) = zH_tot_1(ib,ib,:) + 0.5d0*Act_tmp**2
   end do
 !== act_1 end ==
 !== act_2 start ==
@@ -338,7 +342,7 @@ subroutine BE_half_dt_evolution_only_with_intraband(act_1, act_2)
                                      +zPi_loc(:,:,:,2)*Epdir_1(2) &
                                      +zPi_loc(:,:,:,3)*Epdir_1(3) )
   do ib = 1,NB_basis
-    zH_tot_2(ib,ib,:) = zH_2_tot(ib,ib,:) + 0.5d0*Act_tmp**2
+    zH_tot_2(ib,ib,:) = zH_tot_2(ib,ib,:) + 0.5d0*Act_tmp**2
   end do
 !== act_2 end ==
 
