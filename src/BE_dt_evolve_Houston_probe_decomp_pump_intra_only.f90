@@ -356,7 +356,7 @@ subroutine BE_half_dt_evolution_only_with_intraband(act_1, act_2)
     call zheev('V', 'U', NB_basis, zMat_diag_1, NB_basis, w1, work_lp, lwork, rwork, info)
 
     zMat_diag_2(:,:)=zH_tot_2(:,:,ik)
-    call zheev('V', 'U', NB_basis, zMat_diag_1, NB_basis, w2, work_lp, lwork, rwork, info)
+    call zheev('V', 'U', NB_basis, zMat_diag_2, NB_basis, w2, work_lp, lwork, rwork, info)
 
     w = 0.5d0*(w1+w2)
 
