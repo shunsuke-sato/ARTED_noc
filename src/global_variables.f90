@@ -165,7 +165,7 @@ module global_variables
   real(8),parameter :: epsilon_Lan = 1d-12
 
 ! Houson basis decomposition
-  logical,parameter :: switch_Houston_probe_decomposition = .false. !! .true.
+  logical,parameter :: switch_Houston_probe_decomposition = .true. !! .true.
   real(8),allocatable :: Ac_pump_BE(:),Ac_probe_BE(:)
   real(8),allocatable :: Mask_probe(:,:)
   logical,parameter :: switch_pump_intra_only = .true. !! .true.

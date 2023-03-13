@@ -134,8 +134,12 @@ subroutine BE_dt_evolve_Houston_probe_decomp_pump_intra_only(iter,Act_t)
 
   call BE_half_dt_evolution_only_with_intraband(Ac_pump_BE(iter) &
       ,0.5d0*(Ac_pump_BE(iter)+Ac_pump_BE(iter+1)))
- 
-  call BE_dt_full_evolve_Krylov_exact_diag
+
+  if(Ac_probe_BE(iter) == 0d0 .and. Ac_probe_BE(iter+1) == 0d0)then
+! no probe field
+  else
+    call BE_dt_full_evolve_Krylov_exact_diag
+  end if
 
   call BE_half_dt_evolution_only_with_intraband( &
       0.5d0*(Ac_pump_BE(iter)+Ac_pump_BE(iter+1)) &
