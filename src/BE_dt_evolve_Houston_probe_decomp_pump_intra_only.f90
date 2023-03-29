@@ -188,28 +188,24 @@ contains
             NB_basis)
         
         if(ivec /= nvec)then
-          if_continue = .true.
-          do while (if_continue)
-            if_continue = .false.
-            do ib = 1, nb_td
-              ss = sum(conjg(zvec(:,ib,ivec))*zhvec(:,ib,ivec))
-              zvec(:,ib,ivec+1) = zhvec(:,ib,ivec)-ss*zvec(:,ib,ivec)
+          do ib = 1, nb_td
+            ss = sum(conjg(zvec(:,ib,ivec))*zhvec(:,ib,ivec))
+            zvec(:,ib,ivec+1) = zhvec(:,ib,ivec)-ss*zvec(:,ib,ivec)
+            ss = sum(abs(zvec(:,ib,ivec+1))**2)
+            if(ss == 0d0)then
+              write(*,"(A)")'Warning: (a) linear dependency in BE_dt_full_evolve_Krylov_exact_diag'
+              call random_number(rvec_1); rvec_1 = rvec_1 -0.5d0
+              call random_number(rvec_2); rvec_2 = rvec_2 -0.5d0
+              zvec(:,ib,ivec+1)=rvec_1 + zi*rvec_2
               ss = sum(abs(zvec(:,ib,ivec+1))**2)
-              if(ss == 0d0)then
-                if_continue = .true.
-                write(*,"(A)")'Warning: (a) linear dependency in BE_dt_full_evolve_Krylov_exact_diag'
-                call random_number(rvec_1); rvec_1 = rvec_1 -0.5d0
-                call random_number(rvec_2); rvec_2 = rvec_2 -0.5d0
-                zvec(:,ib,ivec+1)=rvec_1 + zi*rvec_2
-                ss = sum(abs(zvec(:,ib,ivec+1))**2)
-                ss = 1d0/sqrt(ss)
-                zvec(:,ib,ivec+1)=zvec(:,ib,ivec+1)*ss
-              else
-                ss = 1d0/sqrt(ss)
-                zvec(:,ib,ivec+1)=zvec(:,ib,ivec+1)*ss
-              end if
-            end do
+              ss = 1d0/sqrt(ss)
+              zvec(:,ib,ivec+1)=zvec(:,ib,ivec+1)*ss
+            else
+              ss = 1d0/sqrt(ss)
+              zvec(:,ib,ivec+1)=zvec(:,ib,ivec+1)*ss
+            end if
           end do
+
 
 !Gram-Schmidt orthonormalization
           do ib = 1, nb_td
