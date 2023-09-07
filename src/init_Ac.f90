@@ -33,6 +33,8 @@ subroutine init_Ac
   javt_Cvec=0.d0
   Acext_Cvec=0.d0; Acind_Cvec=0.d0; Actot_Cvec=0.d0
 
+  write(*,*)"chirp_1=",chirp_1
+  write(*,*)"chirp_2=",chirp_2
 ! 'cos2cos'                          ! laser_type 'cos2cos', 'cos4cos' or 'impulse'
 
   select case(laser_type)

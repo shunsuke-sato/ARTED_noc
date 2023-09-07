@@ -108,6 +108,7 @@ module global_variables
   real(8) :: dAc
   real(8) :: T1_T2fs
   real(8),allocatable :: Acext_Cvec(:,:),Acind_Cvec(:,:),Actot_Cvec(:,:),javt_Cvec(:,:)
+  real(8) :: chirp_1, chirp_2
 
 ! reentrance
   character(1) :: entrance_option

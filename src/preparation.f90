@@ -77,9 +77,9 @@ subroutine preparation
     read(*,*) option_IP
     read(*,*) dAc
     read(*,*) laser_type,Tr_Lo
-    read(*,*) IWcm2_1,tpulsefs_1,omegaev_1,phi_CEP_1
+    read(*,*) IWcm2_1,tpulsefs_1,omegaev_1,phi_CEP_1,chirp_1
     read(*,*) Epdir_1(1),Epdir_1(2),Epdir_1(3)
-    read(*,*) IWcm2_2,tpulsefs_2,omegaev_2,phi_CEP_2
+    read(*,*) IWcm2_2,tpulsefs_2,omegaev_2,phi_CEP_2,chirp_2
     read(*,*) Epdir_2(1),Epdir_2(2),Epdir_2(3)
     read(*,*) T1_T2fs
     read(*,*) NI,NE
@@ -103,9 +103,11 @@ subroutine preparation
     write(*,'(A,2x,A)')'option_IP = ',option_IP
     write(*,'(A,2x,e16.6e3)') 'dAc = ',dAc
     write(*,'(A,2x,A,2x,A)') 'laser_type, Tr_Lo = ',laser_type,Tr_Lo
-    write(*,'(A,2x,4(2x,e16.6e3))') 'IWcm2_1,tpulsefs_1,omegaev_1,phi_CEP_1 = ',IWcm2_1,tpulsefs_1,omegaev_1,phi_CEP_1
+    write(*,'(A,2x,4(2x,e16.6e3))') 'IWcm2_1,tpulsefs_1,omegaev_1,phi_CEP_1, chirp_1 = '&
+        ,IWcm2_1,tpulsefs_1,omegaev_1,phi_CEP_1, chirp_1
     write(*,'(A,2x,3(2x,e16.6e3))') 'Epdir_1(1),Epdir_1(2),Epdir_1(3) = ',Epdir_1(1),Epdir_1(2),Epdir_1(3)
-    write(*,'(A,2x,4(2x,e16.6e3))') 'IWcm2_2,tpulsefs_2,omegaev_2,phi_CEP_2 = ',IWcm2_2,tpulsefs_2,omegaev_2,phi_CEP_2
+    write(*,'(A,2x,4(2x,e16.6e3))') 'IWcm2_2,tpulsefs_2,omegaev_2,phi_CEP_2, chirp_2 = '&
+        ,IWcm2_2,tpulsefs_2,omegaev_2,phi_CEP_2, chirp_2
     write(*,'(A,2x,3(2x,e16.6e3))') 'Epdir_1(1),Epdir_1(2),Epdir_1(3) = ',Epdir_2(1),Epdir_2(2),Epdir_2(3)
     write(*,'(A,2x,e16.6e3)') 'T1_T2fs = ',T1_T2fs
     write(*,'(A,2(2x,I0))') 'NI,NE = ',NI,NE
@@ -151,11 +153,13 @@ subroutine preparation
   call MPI_BCAST(tpulsefs_1,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(omegaev_1,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(phi_CEP_1,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
+  call MPI_BCAST(chirp_1,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(Epdir_1,3,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(IWcm2_2,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(tpulsefs_2,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(omegaev_2,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(phi_CEP_2,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
+  call MPI_BCAST(chirp_2,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(Epdir_2,3,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(T1_T2fs,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(NI,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)    
