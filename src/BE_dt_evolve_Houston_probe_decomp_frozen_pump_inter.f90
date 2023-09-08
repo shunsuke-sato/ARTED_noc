@@ -23,13 +23,14 @@ subroutine BE_dt_evolve_Houston_probe_decomp_frozen_pump_inter(iter,Act_t1,Act_t
   integer,parameter :: NTaylor = 4
   integer :: iav, iav_t
   real(8) :: diff,xx
-  integer :: ik,ib,iexp
+  integer :: ik,ib,iexp,ib1,ib2
   complex(8) :: zfact
   real(8) :: Act_tmp,Act_probe_tmp
-  complex(8) :: zvec_t(NB_basis,NB_TD)
+  complex(8) :: zvec_t(NB_basis,NB_TD),zvec_t2(NB_basis,NB_TD)
   integer :: ierr_lan
   complex(8),allocatable :: zMat_tmp(:,:)
   complex(8),allocatable :: zMat_tmp2(:,:)
+  complex(8),allocatable :: zU(:,:)
 !LAPACK
   integer :: lwork
   complex(8),allocatable :: work_lp(:)
@@ -45,6 +46,7 @@ subroutine BE_dt_evolve_Houston_probe_decomp_frozen_pump_inter(iter,Act_t1,Act_t
   allocate(zMat_diag2(NB_basis,NB_basis))
   allocate(zMat_tmp(NB_basis,NB_basis))
   allocate(zMat_tmp2(NB_basis,NB_basis))
+  allocate(zU(NB_basis,NB_basis))
 
 ! Propagation with Houston decomposition for probe Hamiltonian
 ! Here, we employ etrs propagation scheme
@@ -207,7 +209,37 @@ subroutine BE_dt_evolve_Houston_probe_decomp_frozen_pump_inter(iter,Act_t1,Act_t
     zMat_tmp2(:,:) = matmul(zdH_tot2(:,:,ik),transpose(conjg(zMat_diag2(:,:))))
     zdH_tot2(:,:,ik) = matmul(zMat_diag2(:,:),zMat_tmp2(:,:))
 
+! propagation with probe hamiltonian from t to t+dt/2
+    call BE_dt_probe_ham_Taylor(zdH_tot(:,:,ik), zCt(:,:,ik), 0.5d0*dt)
 
+!-- Start: Pump propagation
+
+! construct the propagation matrix
+    do ib1=1,nb_basis
+      do ib2=1,nb_basis
+
+        zU(ib1,ib2) = sum(conjg(zMat_diag2(:,ib1))*zMat_diag(:,ib2)) &
+            *exp(-zi*0.5d0*dt*(w2(ib1)+w(ib2)))
+
+      end do
+    end do
+
+    zU=zU*Mask_pump(:,:)
+    call gram_schmidt(nb_basis, zU)
+
+    zvec_t = matmul(transpose(conjg(zMat_diag(:,:))),zCt(:,:,ik))
+    zvec_t2 = matmul(zU,zvec_t)
+    zCt(:,:,ik) = matmul(zMat_diag2(:,:),zvec_t2)
+
+
+!-- End:   Pump propagation
+
+
+
+
+
+! propagation with probe hamiltonian from t+dt/2 to t+dt
+    call BE_dt_probe_ham_Taylor(zdH_tot2(:,:,ik), zCt(:,:,ik), 0.5d0*dt)
 
   end do
 
@@ -216,106 +248,64 @@ subroutine BE_dt_evolve_Houston_probe_decomp_frozen_pump_inter(iter,Act_t1,Act_t
 
   return
 contains
-  subroutine BE_dt_full_evolve_Krylov_exact_diag
+
+  subroutine BE_dt_probe_ham_Taylor(zH_ham, zpsi, dt_t)
     implicit none
-    integer,parameter :: nvec = 16
-    complex(8) :: zvec(NB_basis, NB_TD, nvec)
-    complex(8) :: zhvec(NB_basis, NB_TD, nvec)
-    complex(8) :: zham_m(nvec, nvec),zUprop_m(nvec, nvec)
-    integer :: ib, ivec, jvec, ik
+    complex(8),intent(in) :: zH_ham(NB_basis, NB_basis)
+    complex(8),intent(inout) :: zpsi(NB_basis, NB_TD)
+    real(8),intent(in) :: dt_t
+    complex(8) :: zvec(NB_basis, NB_TD)
+    complex(8) :: zhvec(NB_basis, NB_TD)
+    integer,parameter :: ntaylor = 4
+    integer :: iexp
+    complex(8) :: zfact
+
+    zfact = 1d0
+
+
+    zvec = zpsi
+    do iexp = 1, ntaylor
+      zfact = zfact*(-zi*dt_t)/iexp
+      call zhemm('L', 'U', NB_basis, NB_TD, (1d0,0d0), &
+          zH_ham(1:NB_basis,1:NB_basis,ik), &
+          NB_basis,&
+          zvec(1:NB_basis,1:NB_TD), &
+          NB_basis, (0d0,0d0), &
+          zhvec(1:NB_basis,1:NB_TD), &
+          NB_basis)
+
+      zpsi = zpsi + zfact*zhvec
+      zvec = zhvec
+
+    end do
+  end subroutine BE_dt_probe_ham_Taylor
+
+  subroutine gram_schmidt(n, zmat)
+    implicit none
+    integer,intent(in) :: n
+    complex(8),intent(inout) :: zmat(n,n)
     real(8) :: ss
     complex(8) :: zs
-!LAPACK
-    integer :: lwork
-    complex(8),allocatable :: work_lp(:)
-    real(8),allocatable :: rwork(:),w(:)
-    integer :: info
+    integer :: i,j
 
-    lwork=6*nvec+128
-    allocate(work_lp(lwork),rwork(3*nvec-2),w(nvec))
-      
-    K_point : do ik=NK_s,NK_e
 
-      zvec(1:NB_basis,1:NB_TD,1) = zCt(1:NB_basis, 1:NB_TD, ik)
-!normalize
-      do ib = 1, nb_td
-        ss = sum(abs(zvec(:,ib,1))**2); ss = 1d0/sqrt(ss)
-        zvec(:,ib,1)=zvec(:,ib,1)*ss
-      end do
+    do i = 1, n
 
-!Construction of Krylov subspace
-      do ivec = 1, nvec
+      ss = sqrt( sum(abs(zmat(:,i))**2) )
+      zmat(:,i) = zmat(:,i)/ss
 
-        call zhemm('L', 'U', NB_basis, NB_TD, (1d0,0d0), &
-            zH_tot(1:NB_basis,1:NB_basis,ik), &
-            NB_basis,&
-            zvec(1:NB_basis,1:NB_TD, ivec), &
-            NB_basis, (0d0,0d0), &
-            zhvec(1:NB_basis,1:NB_TD,ivec), &
-            NB_basis)
-        
-        if(ivec /= nvec)then
-          do ib = 1, nb_td
-            ss = sum(conjg(zvec(:,ib,ivec))*zhvec(:,ib,ivec))
-            zvec(:,ib,ivec+1) = zhvec(:,ib,ivec)-ss*zvec(:,ib,ivec)
-            ss = sum(abs(zvec(:,ib,ivec+1))**2)
-            if(ss == 0d0)then
-              write(*,"(A)")'Warning: (a) linear dependency in BE_dt_full_evolve_Krylov_exact_diag'
-              zvec(:,ib,ivec+1)=1d0/sqrt(dble(NB_basis))
-            else
-              ss = 1d0/sqrt(ss)
-              zvec(:,ib,ivec+1)=zvec(:,ib,ivec+1)*ss
-            end if
-          end do
+      do j = 1,i-1
 
-!Gram-Schmidt orthonormalization
-          do ib = 1, nb_td
-            do jvec = 1, ivec
-              zs = sum(conjg(zvec(:,ib,jvec))*zvec(:,ib,ivec+1))
-              zvec(:,ib,ivec+1) = zvec(:,ib,ivec+1) -zs*zvec(:,ib,jvec)
-            end do
-            ss = sum(abs(zvec(:,ib,ivec+1))**2)
-            if(ss == 0d0)then
-              write(*,"(A)")'Warning: (b) linear dependency in BE_dt_full_evolve_Krylov_exact_diag'
-              stop
-            end if
-            ss = 1d0/sqrt(ss)
-            zvec(:,ib,ivec+1)=zvec(:,ib,ivec+1)*ss
-          end do
-          
-        end if
+        zs = sum(conjg(zmat(:,j))*zmat(:,i))
+        zmat(:,i) = zmat(:,i)-zs*zmat(:,j)
 
       end do
 
-      
-      do ib = 1, nb_td
-        do ivec = 1, nvec
-          zham_m(ivec,ivec) = sum( conjg(zhvec(:,ib,ivec))*zvec(:,ib,ivec))
-          do jvec = ivec+1, nvec
-            zham_m(ivec,jvec) = sum( conjg(zhvec(:,ib,ivec))*zvec(:,ib,jvec))
-            zham_m(jvec,ivec) = conjg(zham_m(ivec,jvec))
-          end do
-        end do
-        
-!diag
-        call zheev('V', 'U', nvec, zham_m, nvec, w, work_lp, lwork, rwork, info)
+      ss = sqrt( sum(abs(zmat(:,i))**2) )
+      zmat(:,i) = zmat(:,i)/ss
 
-        zUprop_m = 0d0
-        do ivec = 1, nvec
-          zUprop_m(ivec, ivec) = exp(-zi*dt*w(ivec))
-        end do
-        zUprop_m = matmul(matmul(zham_m,zUprop_m),conjg(transpose(zham_m)))
-        zCt(1:NB_basis, ib, ik) = zvec(:,ib,1)*zUprop_m(1,1)
-        do ivec = 2, nvec
-          zCt(1:NB_basis, ib, ik) = &
-              zCt(1:NB_basis, ib, ik) + zvec(:,ib,ivec)*zUprop_m(ivec,1)
-        end do
-        
-      end do
+    end do
 
-
-    end do K_point
-
-  end subroutine BE_dt_full_evolve_Krylov_exact_diag
+  end subroutine gram_schmidt
 end subroutine BE_dt_evolve_Houston_probe_decomp_frozen_pump_inter
 
