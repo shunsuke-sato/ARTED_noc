@@ -154,7 +154,7 @@ module global_variables
   complex(8),allocatable :: zV_NL(:,:,:,:),zPi_NL(:,:,:,:,:)
   complex(8),allocatable :: zH_tot(:,:,:),zPi_tot(:,:,:,:)
   complex(8),allocatable :: zH0_tot(:,:,:),zdH_tot(:,:,:)
-  complex(8),allocatable :: zH0_tot2(:,:,:),zdH_tot2(:,:,:)
+  complex(8),allocatable :: zH_tot2(:,:,:),zdH_tot2(:,:,:)
   real(8),allocatable :: H0_eigval(:,:)
   integer,parameter :: NAmax = 20
   real(8) :: Amax,dAmax
@@ -173,5 +173,6 @@ module global_variables
 
 ! Frozen pump-indced interband transitions
   logical,parameter :: switch_pump_induced_interband_transition = .false. !! .true.
+  real(8),allocatable :: Mask_pump(:,:)
 
 end Module Global_Variables

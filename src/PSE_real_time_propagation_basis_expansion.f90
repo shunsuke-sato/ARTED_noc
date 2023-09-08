@@ -49,8 +49,7 @@ subroutine PSE_real_time_propagation_basis_expansion
     if(switch_Houston_probe_decomposition)then
 
       if(switch_pump_induced_interband_transition)then
-        call BE_dt_evolve_Houston_probe_decomp_frozen_pump_inter(iter &
-            ,Actot_BE(iter),Actot_BE(iter+1))
+        call BE_dt_evolve_Houston_probe_decomp_frozen_pump_inter(iter)
       else
         Act_t = 0.5d0*( Actot_BE(iter+1) + Actot_BE(iter) )
         call BE_dt_evolve_Houston_probe_decomp(iter,Act_t)

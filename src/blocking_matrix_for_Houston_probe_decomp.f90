@@ -44,7 +44,7 @@ subroutine blocking_matrix_for_Houston_probe_decomp
 
   if(switch_pump_induced_interband_transition)then
     allocate(Mask_pump(NB_basis,NB_basis))
-    allocate(nglag_include(nb_basis))
+    allocate(nflag_include(nb_basis))
 
 ! 1:include, 2:exclude
     nflag_include(:) = 1

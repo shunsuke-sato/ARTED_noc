@@ -13,12 +13,11 @@
 !  See the License for the specific language governing permissions and
 !  limitations under the License.
 !
-subroutine BE_dt_evolve_Houston_probe_decomp_frozen_pump_inter(iter,Act_t1,Act_t2)
+subroutine BE_dt_evolve_Houston_probe_decomp_frozen_pump_inter(iter)
   use global_variables
   use PSE_variables
   implicit none
   integer,intent(in) :: iter
-  real(8),intent(in) :: Act_t1,Act_t2
   real(8),parameter :: eps_Act = 1d-6
   integer,parameter :: NTaylor = 4
   integer :: iav, iav_t
@@ -30,7 +29,7 @@ subroutine BE_dt_evolve_Houston_probe_decomp_frozen_pump_inter(iter,Act_t1,Act_t
   integer :: ierr_lan
   complex(8),allocatable :: zMat_tmp(:,:)
   complex(8),allocatable :: zMat_tmp2(:,:)
-  complex(8),allocatable :: zU(:,:)
+  complex(8),allocatable :: zUm(:,:)
 !LAPACK
   integer :: lwork
   complex(8),allocatable :: work_lp(:)
@@ -46,7 +45,7 @@ subroutine BE_dt_evolve_Houston_probe_decomp_frozen_pump_inter(iter,Act_t1,Act_t
   allocate(zMat_diag2(NB_basis,NB_basis))
   allocate(zMat_tmp(NB_basis,NB_basis))
   allocate(zMat_tmp2(NB_basis,NB_basis))
-  allocate(zU(NB_basis,NB_basis))
+  allocate(zUm(NB_basis,NB_basis))
 
 ! Propagation with Houston decomposition for probe Hamiltonian
 ! Here, we employ etrs propagation scheme
@@ -218,17 +217,17 @@ subroutine BE_dt_evolve_Houston_probe_decomp_frozen_pump_inter(iter,Act_t1,Act_t
     do ib1=1,nb_basis
       do ib2=1,nb_basis
 
-        zU(ib1,ib2) = sum(conjg(zMat_diag2(:,ib1))*zMat_diag(:,ib2)) &
+        zUm(ib1,ib2) = sum(conjg(zMat_diag2(:,ib1))*zMat_diag(:,ib2)) &
             *exp(-zi*0.5d0*dt*(w2(ib1)+w(ib2)))
 
       end do
     end do
 
-    zU=zU*Mask_pump(:,:)
-    call gram_schmidt(nb_basis, zU)
+    zUm=zUm*Mask_pump(:,:)
+    call gram_schmidt(nb_basis, zUm)
 
     zvec_t = matmul(transpose(conjg(zMat_diag(:,:))),zCt(:,:,ik))
-    zvec_t2 = matmul(zU,zvec_t)
+    zvec_t2 = matmul(zUm,zvec_t)
     zCt(:,:,ik) = matmul(zMat_diag2(:,:),zvec_t2)
 
 
@@ -243,8 +242,6 @@ subroutine BE_dt_evolve_Houston_probe_decomp_frozen_pump_inter(iter,Act_t1,Act_t
 
   end do
 
-
-  call BE_dt_full_evolve_Krylov_exact_diag
 
   return
 contains
@@ -267,7 +264,7 @@ contains
     do iexp = 1, ntaylor
       zfact = zfact*(-zi*dt_t)/iexp
       call zhemm('L', 'U', NB_basis, NB_TD, (1d0,0d0), &
-          zH_ham(1:NB_basis,1:NB_basis,ik), &
+          zH_ham(1:NB_basis,1:NB_basis), &
           NB_basis,&
           zvec(1:NB_basis,1:NB_TD), &
           NB_basis, (0d0,0d0), &
