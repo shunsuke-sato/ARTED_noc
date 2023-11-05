@@ -18,6 +18,11 @@ subroutine PSE_read_matrix_elements
   implicit none
   integer :: ik
   character(50) :: cik, filename
+  integer :: NK_s_comm, NK_e_comm, iproc
+  complex(8),allocatable :: zH_loc_comm(:,:,:),zPi_loc_comm(:,:,:,:)
+  complex(8),allocatable :: zV_NL_comm(:,:,:,:),zPi_NL_comm(:,:,:,:,:)
+  integer :: ista(MPI_STATUS_SIZE)
+  
 
   if(myrank == 0)write(*,"(A)")"== Start reading matrix elements."
   if(myrank == 0)then
@@ -49,17 +54,57 @@ subroutine PSE_read_matrix_elements
   allocate(zH_tot2(NB_basis,NB_basis,NK_s:NK_e))
   allocate(zdH_tot2(NB_basis,NB_basis,NK_s:NK_e))
   allocate(H0_eigval(NB_basis,NK_s:NK_e))
-  do ik = NK_s,NK_e
-    write(cik,"(I9.9)")ik
-    filename="matrix_element/"//trim(cik)//"_matrix_elements.out"
-    open(201,file=filename,form='unformatted')
-    read(201)zH_loc(:,:,ik)
-    read(201)zPi_loc(:,:,ik,:)
-    read(201)zV_NL(:,:,ik,:)
-    read(201)zPi_NL(:,:,ik,:,:)
-    close(201)
-  end do
 
+  if(myrank == 0)then
+    filename="matrix_element/matrix_elements.out"
+    open(201,file=filename,form='unformatted')
+    do ik = NK_s,NK_e
+      read(201)zH_loc(:,:,ik)
+      read(201)zPi_loc(:,:,ik,:)
+      read(201)zV_NL(:,:,ik,:)
+      read(201)zPi_NL(:,:,ik,:,:)
+    end do
+  end if
+
+  do iproc = 1, Nprocs-1
+     if(myrank == iproc)then
+        call MPI_Send(NK_s, 1, MPI_INTEGER, 0, iproc, MPI_COMM_WORLD, ierr)
+        call MPI_Send(NK_e, 1, MPI_INTEGER, 0, iproc, MPI_COMM_WORLD, ierr)
+
+        call MPI_Recv(zH_loc,size(zH_loc), MPI_DOUBLE_COMPLEX, 0, iproc, MPI_COMM_WORLD, ista, ierr)
+        call MPI_Recv(zPi_loc,size(zPi_loc), MPI_DOUBLE_COMPLEX, 0, iproc, MPI_COMM_WORLD, ista, ierr)
+        call MPI_Recv(zV_NL,size(zV_NL), MPI_DOUBLE_COMPLEX, 0, iproc, MPI_COMM_WORLD, ista, ierr)
+        call MPI_Recv(zPi_NL,size(zPi_NL), MPI_DOUBLE_COMPLEX, 0, iproc, MPI_COMM_WORLD, ista, ierr)
+
+     else if(myrank == 0)then
+        call MPI_Recv(NK_s_comm, 1, MPI_INTEGER, iproc, iproc, MPI_COMM_WORLD, ista, ierr)
+        call MPI_Recv(NK_e_comm, 1, MPI_INTEGER, iproc, iproc, MPI_COMM_WORLD, ista, ierr)
+
+        allocate(zH_loc_comm(NB_basis,NB_basis,NK_s_comm:NK_e_comm))
+        allocate(zPi_loc_comm(NB_basis,NB_basis,NK_s_comm:NK_e_comm,3))
+        allocate(zV_NL_comm(NB_basis,NB_basis,NK_s_comm:NK_e_comm,-NAmax:NAmax))
+        allocate(zPi_NL_comm(NB_basis,NB_basis,NK_s_comm:NK_e_comm,3,-NAmax:NAmax))        
+        
+        do ik = NK_s_comm,NK_e_comm
+           read(201)zH_loc_comm(:,:,ik)
+           read(201)zPi_loc_comm(:,:,ik,:)
+           read(201)zV_NL_comm(:,:,ik,:)
+           read(201)zPi_NL_comm(:,:,ik,:,:)
+        end do
+        
+        call MPI_Send(zH_loc_comm,size(zH_loc_comm), MPI_DOUBLE_COMPLEX, iproc, iproc, MPI_COMM_WORLD, ierr)
+        call MPI_Send(zPi_loc_comm,size(zPi_loc_comm), MPI_DOUBLE_COMPLEX, iproc, iproc, MPI_COMM_WORLD, ierr)   
+        call MPI_Send(zV_NL_comm,size(zV_NL_comm), MPI_DOUBLE_COMPLEX, iproc, iproc, MPI_COMM_WORLD, ierr)
+        call MPI_Send(zPi_NL_comm,size(zPi_NL_comm), MPI_DOUBLE_COMPLEX, iproc, iproc, MPI_COMM_WORLD, ierr)
+
+        deallocate(zH_loc_comm,zPi_loc_comm,zV_NL_comm,zPi_NL_comm)
+        
+     end if
+     
+     call MPI_BARRIER(MPI_COMM_WORLD, ierr)
+  end do
+  
+  if(myrank == 0)close(201)
   if(myrank == 0)write(*,"(A)")"== End reading matrix elements."
   return
 end subroutine PSE_read_matrix_elements

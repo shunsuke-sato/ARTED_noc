@@ -25,7 +25,10 @@ subroutine PSE_preparation_matrix
   complex(8) :: uVpsi,uVpsix,uVpsiy,uVpsiz
   real(8) :: x1,x2,x3
   character(50) :: cik, filename
-
+  integer :: NK_s_comm, NK_e_comm, iproc
+  complex(8),allocatable :: zH_loc_comm(:,:,:),zPi_loc_comm(:,:,:,:)
+  complex(8),allocatable :: zV_NL_comm(:,:,:,:),zPi_NL_comm(:,:,:,:,:)
+  integer :: ista(MPI_STATUS_SIZE)
 
   f0_1=5.338d-9*sqrt(IWcm2_1)      ! electric field in a.u.
   omega_1=omegaev_1/(2d0*Ry)  ! frequency in a.u.
@@ -36,6 +39,7 @@ subroutine PSE_preparation_matrix
   allocate(zPi_loc(NB_basis,NB_basis,NK_s:NK_e,3))
   allocate(zV_NL(NB_basis,NB_basis,NK_s:NK_e,-NAmax:NAmax))
   allocate(zPi_NL(NB_basis,NB_basis,NK_s:NK_e,3,-NAmax:NAmax))
+
 
   kAc_Cvec(:,:)=kAc0_Cvec(:,:)
   call PSE_pre_hpsi
@@ -215,17 +219,59 @@ subroutine PSE_preparation_matrix
     close(200)
   end if
 
-  do ik = NK_s,NK_e
-    write(cik,"(I9.9)")ik
-    filename="matrix_element/"//trim(cik)//"_matrix_elements.out"
-    open(201,file=filename,form='unformatted')
-    write(201)zH_loc(:,:,ik)
-    write(201)zPi_loc(:,:,ik,:)
-    write(201)zV_NL(:,:,ik,:)
-    write(201)zPi_NL(:,:,ik,:,:)
-    close(201)
+
+  
+  if(myrank == 0)then
+     filename="matrix_element/matrix_elements.out"
+     open(201,file=filename,form='unformatted')
+     do ik = NK_s,NK_e
+        write(201)zH_loc(:,:,ik)
+        write(201)zPi_loc(:,:,ik,:)
+        write(201)zV_NL(:,:,ik,:)
+        write(201)zPi_NL(:,:,ik,:,:)
+     end do
+     
+  end if
+
+  do iproc = 1, Nprocs-1
+     if(myrank == iproc)then
+        call MPI_Send(NK_s, 1, MPI_INTEGER, 0, iproc, MPI_COMM_WORLD, ierr)
+        call MPI_Send(NK_e, 1, MPI_INTEGER, 0, iproc, MPI_COMM_WORLD, ierr)
+
+        call MPI_Send(zH_loc,size(zH_loc), MPI_DOUBLE_COMPLEX, 0, iproc, MPI_COMM_WORLD, ierr)
+        call MPI_Send(zPi_loc,size(zPi_loc), MPI_DOUBLE_COMPLEX, 0, iproc, MPI_COMM_WORLD, ierr)   
+        call MPI_Send(zV_NL,size(zV_NL), MPI_DOUBLE_COMPLEX, 0, iproc, MPI_COMM_WORLD, ierr)
+        call MPI_Send(zPi_NL,size(zPi_NL), MPI_DOUBLE_COMPLEX, 0, iproc, MPI_COMM_WORLD, ierr)
+
+        
+     else if(myrank == 0)then
+        call MPI_Recv(NK_s_comm, 1, MPI_INTEGER, iproc, iproc, MPI_COMM_WORLD, ista, ierr)
+        call MPI_Recv(NK_e_comm, 1, MPI_INTEGER, iproc, iproc, MPI_COMM_WORLD, ista, ierr)
+
+        allocate(zH_loc_comm(NB_basis,NB_basis,NK_s_comm:NK_e_comm))
+        allocate(zPi_loc_comm(NB_basis,NB_basis,NK_s_comm:NK_e_comm,3))
+        allocate(zV_NL_comm(NB_basis,NB_basis,NK_s_comm:NK_e_comm,-NAmax:NAmax))
+        allocate(zPi_NL_comm(NB_basis,NB_basis,NK_s_comm:NK_e_comm,3,-NAmax:NAmax))
+
+        call MPI_Recv(zH_loc_comm,size(zH_loc_comm), MPI_DOUBLE_COMPLEX, iproc, iproc, MPI_COMM_WORLD, ista, ierr)
+        call MPI_Recv(zPi_loc_comm,size(zPi_loc_comm), MPI_DOUBLE_COMPLEX, iproc, iproc, MPI_COMM_WORLD, ista, ierr)
+        call MPI_Recv(zV_NL_comm,size(zV_NL_comm), MPI_DOUBLE_COMPLEX, iproc, iproc, MPI_COMM_WORLD, ista, ierr)
+        call MPI_Recv(zPi_NL_comm,size(zPi_NL_comm), MPI_DOUBLE_COMPLEX, iproc, iproc, MPI_COMM_WORLD, ista, ierr)
+
+        do ik = NK_s_comm,NK_e_comm
+           write(201)zH_loc_comm(:,:,ik)
+           write(201)zPi_loc_comm(:,:,ik,:)
+           write(201)zV_NL_comm(:,:,ik,:)
+           write(201)zPi_NL_comm(:,:,ik,:,:)
+        end do
+        deallocate(zH_loc_comm,zPi_loc_comm,zV_NL_comm,zPi_NL_comm)
+        
+     end if
+
+     call MPI_BARRIER(MPI_COMM_WORLD, ierr)
   end do
 
+  if(myrank == 0)close(201)
 
   return
 end subroutine PSE_preparation_matrix
