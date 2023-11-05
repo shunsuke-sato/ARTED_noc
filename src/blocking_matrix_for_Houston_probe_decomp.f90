@@ -17,6 +17,7 @@ subroutine blocking_matrix_for_Houston_probe_decomp
   use global_variables
   implicit none
   integer :: ib1,ib2
+  integer,allocatable :: nflag_include(:)
 
   if(myrank == 0)write(*,"(A)")&
     "== Start: constructing Blocking Matrix for Houston probe decomposition."
@@ -39,6 +40,26 @@ subroutine blocking_matrix_for_Houston_probe_decomp
 
   if(myrank == 0)write(*,"(A)")&
     "== End: constructing Blocking Matrix for Houston probe decomposition."
+
+
+  if(switch_pump_induced_interband_transition)then
+    allocate(Mask_pump(NB_basis,NB_basis))
+    allocate(nflag_include(nb_basis))
+
+! 1:include, 2:exclude
+    nflag_include(:) = 1
+
+
+    mask_pump = 1d0
+    do ib1 = 1, nb_basis
+      do ib2 = 1, nb_basis
+        if(ib1 /= ib2)then
+          mask_pump(ib1,ib2)=nflag_include(ib1)*nflag_include(ib2)
+        end if
+      end do
+    end do
+
+  end if
 
   return
 end subroutine blocking_matrix_for_Houston_probe_decomp

@@ -46,6 +46,8 @@ subroutine PSE_read_matrix_elements
   allocate(zPi_tot(NB_basis,NB_basis,NK_s:NK_e,3))
   allocate(zH0_tot(NB_basis,NB_basis,NK_s:NK_e))
   allocate(zdH_tot(NB_basis,NB_basis,NK_s:NK_e))
+  allocate(zH_tot2(NB_basis,NB_basis,NK_s:NK_e))
+  allocate(zdH_tot2(NB_basis,NB_basis,NK_s:NK_e))
   allocate(H0_eigval(NB_basis,NK_s:NK_e))
   do ik = NK_s,NK_e
     write(cik,"(I9.9)")ik
