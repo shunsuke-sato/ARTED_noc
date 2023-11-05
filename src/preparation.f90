@@ -70,7 +70,7 @@ subroutine preparation
     read(*,*) NL1,NL2,NL3
     read(*,*) NK1,NK2,NK3
     read(*,*) dkshift(1:3)
-    read(*,*) NB,Nelec,NB_TD
+    read(*,*) NB,Nelec,NB_TD,if_occ_read_from_file
     read(*,*) Ncg,Nscf
     read(*,*) Nt,dt,Npred_corr
     read(*,*) option_TD_band_dos,Nstep_TD_band_dos
@@ -96,7 +96,7 @@ subroutine preparation
     write(*,'(A,4(2x,I0))') 'NL1,NL2,NL3 = ',NL1,NL2,NL3
     write(*,'(A,4(2x,I0))') 'NK1,NK2,NK3 = ',NK1,NK2,NK3
     write(*,'(A,3e16.6e3)') 'dkshift(1:3) = ',dkshift(1:3)
-    write(*,'(A,3(2x,I0))') 'NB,Nelec = ',NB,Nelec,NB_TD
+    write(*,'(A,3(2x,I0),2x,A)') 'NB,Nelec = ',NB,Nelec,NB_TD,if_occ_read_from_file
     write(*,'(A,2(2x,I0))') 'Ncg,Nscf = ',Ncg,Nscf
     write(*,'(A,2x,I0,2x,e16.6e3)') 'Nt,dt = ',Nt,dt
     write(*,'(A,2x,A,2x,I6)')'option_TD_band_dos,Nstep_TD_band_dos = ',option_TD_band_dos,Nstep_TD_band_dos
@@ -138,6 +138,7 @@ subroutine preparation
   call MPI_BCAST(NB,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(Nelec,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(NB_TD,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
+  call MPI_BCAST(if_occ_read_from_file,1,MPI_CHARACTER,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(Ncg,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(Nscf,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(Nt,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
@@ -196,6 +197,7 @@ subroutine preparation
   call prep_finite_difference
   call NK_split
   call pre_allocation
+  if(if_occ_read_from_file == 'y')call read_occupation_from_file
   call prep_Discrete_Fourier_Transformation
   call prep_Conjugate_Gradient
   call prep_subspace_diag

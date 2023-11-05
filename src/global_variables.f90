@@ -71,6 +71,7 @@ module global_variables
 
 ! wave function, work
   integer :: NB,NB_TD
+  character(1) :: if_occ_read_from_file
   real(8),allocatable :: occ_TD(:,:),occ_TD_l(:,:)
   complex(8),allocatable :: zu(:,:,:),zu_GS(:,:,:),zu_GS0(:,:,:)
   complex(8),allocatable :: tpsi(:),htpsi(:),tpsi_g1(:),tpsi_g2(:)
