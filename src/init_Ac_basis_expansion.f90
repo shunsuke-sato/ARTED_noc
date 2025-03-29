@@ -24,6 +24,7 @@ subroutine init_Ac_basis_expansion
   real(8),allocatable :: Eexp_org(:)
   real(8) :: Eexp_max, texp_ave, t_exp_sigma, cut_sigma, ss
   real(8) :: Ac_tmp
+  real(8),parameter :: t_offset = 10d0/0.024189d0
 
   if(myrank == 0)write(*,"(A)")"== Start: Initialization of vector potential."
 
@@ -141,7 +142,8 @@ subroutine init_Ac_basis_expansion
 
     texp_ave = sum(Eexp**2*tt_exp)/sum(Eexp**2)
     t_exp_sigma = sum(Eexp**2*(tt_exp-texp_ave)**2)/sum(Eexp**2)
-    cut_sigma = t_exp_sigma*(4d0**2)
+    write(*,*)'t_exp_sigma',sqrt(t_exp_sigma)*0.024189d0
+    cut_sigma = (sqrt(t_exp_sigma)*4d0)**10
     Eexp = Eexp * exp(-0.5d0*(tt_exp-texp_ave)**10/cut_sigma)
 
     Aexp = 0d0
@@ -158,14 +160,14 @@ subroutine init_Ac_basis_expansion
     if(myrank == 0)then
       open(132,file="test_field.dat")
       do it = 1, nt_exp
-        write(132,"(999e26.16e3)")tt_exp(it), Eexp_org(it), Eexp(it)
+        write(132,"(999e26.16e3)")tt_exp(it), Eexp_org(it), Eexp(it), aexp(it)
       end do
       close(132)
 
       open(132,file="test_ac_field.dat")
-      do it = 1, nt_exp
+      do it = 1, nt_exp-1
         write(132,"(999e26.16e3)")0.5d0*(tt_exp(it)+tt_exp(it+1)) &
-            ,-0.5d0*(Aexp(it+1)-Aexp(it))/(tt_exp(it+1)-tt_exp(it))
+            ,-(Aexp(it+1)-Aexp(it))/(tt_exp(it+1)-tt_exp(it))
       end do
       close(132)
     end if
@@ -173,7 +175,7 @@ subroutine init_Ac_basis_expansion
 ! pulse shape : A(t)=f0/omega*sin(Pi t/T)**4 *cos (omega t+phi_CEP*2d0*pi) 
 ! pump laser
     do iter=0,Nt+2
-      tt=iter*dt
+      tt=iter*dt - t_offset
       if (tt<tpulse_1) then
         Actot_BE(iter)=-f0_1/omega_1*(cos(pi*(tt-0.5d0*tpulse_1)/tpulse_1))**2&
             *sin(omega_1*(1d0+chirp_1*(tt-0.5d0*tpulse_1))*(tt-0.5d0*tpulse_1)+phi_CEP_1*2d0*pi)
@@ -181,7 +183,7 @@ subroutine init_Ac_basis_expansion
     enddo
 ! probe laser
     do iter=0,Nt+2
-      tt=iter*dt
+      tt=iter*dt - t_offset
       ss = tt -0.5d0*tpulse_1 + texp_ave
       if(ss > tt_exp(1) .and. ss < tt_exp(nt_exp))then
         do it = 1, nt_exp
