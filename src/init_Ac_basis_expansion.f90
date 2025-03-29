@@ -136,7 +136,7 @@ subroutine init_Ac_basis_expansion
     call MPI_BCAST(Eexp,nt_exp,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
 
     Eexp_max = maxval(abs(Eexp))
-    Eexp = (Eexp/Eexp_max)*(1d6/1d-2)*(a_B*1d-10/27.2114d0) ! 1MV/cm
+    Eexp = (Eexp/Eexp_max)*f0_2 ! 1MV/cm
 
     Eexp_org = Eexp
 
