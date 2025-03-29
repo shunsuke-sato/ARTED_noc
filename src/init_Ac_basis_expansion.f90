@@ -19,6 +19,11 @@ subroutine init_Ac_basis_expansion
   integer :: iter
   real(8) :: tt,xx
   real(8) :: f0_1,f0_2,omega_1,omega_2,tpulse_1,tpulse_2,T1_T2
+  integer :: nt_exp, nlines, io, it
+  real(8),allocatable :: tt_exp(:), Eexp(:), Aexp(:)
+  real(8),allocatable :: Eexp_org(:)
+  real(8) :: Eexp_max, texp_ave, t_exp_sigma, cut_sigma, ss
+  real(8) :: Ac_tmp
 
   if(myrank == 0)write(*,"(A)")"== Start: Initialization of vector potential."
 
@@ -26,11 +31,11 @@ subroutine init_Ac_basis_expansion
 
   f0_1=5.338d-9*sqrt(IWcm2_1)      ! electric field in a.u.
   omega_1=omegaev_1/(2d0*Ry)  ! frequency in a.u.
-  tpulse_1=tpulsefs_1/0.02418d0 ! pulse duration in a.u.
+  tpulse_1=tpulsefs_1/0.024189d0 ! pulse duration in a.u.
   f0_2=5.338d-9*sqrt(IWcm2_2)      ! electric field in a.u.
   omega_2=omegaev_2/(2d0*Ry)  ! frequency in a.u.
-  tpulse_2=tpulsefs_2/0.02418d0 ! pulse duration in a.u.
-  T1_T2=T1_T2fs/0.02418d0 ! pulse duration in a.u.
+  tpulse_2=tpulsefs_2/0.024189d0 ! pulse duration in a.u.
+  T1_T2=T1_T2fs/0.024189d0 ! pulse duration in a.u.
   javt_BE=0.d0
   Actot_BE = 0d0 
 
@@ -97,6 +102,99 @@ subroutine init_Ac_basis_expansion
           +phi_CEP_2*2d0*pi)
       endif
     enddo
+  case('ge_exp')
+    if(myrank == 0)then
+      nlines = 0
+      open(131,file="exp_field.dat")
+      read(131,*)
+      nlines = nlines + 1
+      do
+        read(131,*,iostat=io)
+        IF (io/=0) EXIT
+        nlines = nlines + 1
+      end do
+      close(131)
+      nt_exp = nlines -1
+    end if
+    call MPI_BCAST(nt_exp,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)    
+    allocate(tt_exp(nt_exp))
+    allocate(Eexp(nt_exp))
+    allocate(Eexp_org(nt_exp))
+    allocate(Aexp(nt_exp))
+    if(myrank == 0)then
+      open(131,file="exp_field.dat")
+      read(131,*)
+      do it = 1, nt_exp
+        read(131,*)tt_exp(it),Eexp(it)
+      end do
+      close(131)
+      tt_exp = tt_exp/0.024189d0
+    end if
+    call MPI_BCAST(nt_exp,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)    
+    call MPI_BCAST(tt_exp,nt_exp,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
+    call MPI_BCAST(Eexp,nt_exp,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
+
+    Eexp_max = maxval(abs(Eexp))
+    Eexp = (Eexp/Eexp_max)*(1d6/1d-2)*(a_B*1d-10/27.2114d0) ! 1MV/cm
+
+    Eexp_org = Eexp
+
+    texp_ave = sum(Eexp**2*tt_exp)/sum(Eexp**2)
+    t_exp_sigma = sum(Eexp**2*(tt_exp-texp_ave)**2)/sum(Eexp**2)
+    cut_sigma = t_exp_sigma*(4d0**2)
+    Eexp = Eexp * exp(-0.5d0*(tt_exp-texp_ave)**10/cut_sigma)
+
+    Aexp = 0d0
+    ss = 0d0
+    ss = 0.5d0*Eexp(1)*(tt_exp(2)-tt_exp(1))
+    do it = 2, nt_exp
+      ss = ss + 0.5d0*Eexp(it)*(tt_exp(it)-tt_exp(it-1))
+      Aexp(it) = -ss
+      ss = ss + 0.5d0*Eexp(it)*(tt_exp(it)-tt_exp(it-1))
+    end do
+
+    Aexp = Aexp * exp(-0.5d0*(tt_exp-texp_ave)**10/cut_sigma)
+    
+    if(myrank == 0)then
+      open(132,file="test_field.dat")
+      do it = 1, nt_exp
+        write(132,"(999e26.16e3)")tt_exp(it), Eexp_org(it), Eexp(it)
+      end do
+      close(132)
+
+      open(132,file="test_ac_field.dat")
+      do it = 1, nt_exp
+        write(132,"(999e26.16e3)")0.5d0*(tt_exp(it)+tt_exp(it+1)) &
+            ,-0.5d0*(Aexp(it+1)-Aexp(it))/(tt_exp(it+1)-tt_exp(it))
+      end do
+      close(132)
+    end if
+
+! pulse shape : A(t)=f0/omega*sin(Pi t/T)**4 *cos (omega t+phi_CEP*2d0*pi) 
+! pump laser
+    do iter=0,Nt+2
+      tt=iter*dt
+      if (tt<tpulse_1) then
+        Actot_BE(iter)=-f0_1/omega_1*(cos(pi*(tt-0.5d0*tpulse_1)/tpulse_1))**2&
+            *sin(omega_1*(1d0+chirp_1*(tt-0.5d0*tpulse_1))*(tt-0.5d0*tpulse_1)+phi_CEP_1*2d0*pi)
+      end if
+    enddo
+! probe laser
+    do iter=0,Nt+2
+      tt=iter*dt
+      ss = tt -0.5d0*tpulse_1 + texp_ave
+      if(ss > tt_exp(1) .and. ss < tt_exp(nt_exp))then
+        do it = 1, nt_exp
+          if(ss < tt_exp(it))then
+            
+            Ac_tmp = Aexp(it-1)*(tt_exp(it)-ss)/(tt_exp(it)-tt_exp(it-1)) &
+                + Aexp(it)*(ss-tt_exp(it-1))/(tt_exp(it)-tt_exp(it-1))
+            exit
+          end if
+        end do
+        Actot_BE(iter)=Actot_BE(iter) + Ac_tmp
+      end if
+    end do
   case default
     err_message='error in init_Ac'
     call err_finalize
