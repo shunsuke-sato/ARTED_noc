@@ -136,13 +136,15 @@ subroutine init_Ac_basis_expansion
     call MPI_BCAST(Eexp,nt_exp,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
 
     Eexp_max = maxval(abs(Eexp))
-    Eexp = (Eexp/Eexp_max)*f0_2 ! 1MV/cm
-
-    Eexp_org = Eexp
+    Eexp = (Eexp/Eexp_max)
 
     texp_ave = sum(Eexp**2*tt_exp)/sum(Eexp**2)
     t_exp_sigma = sum(Eexp**2*(tt_exp-texp_ave)**2)/sum(Eexp**2)
-    write(*,*)'t_exp_sigma',sqrt(t_exp_sigma)*0.024189d0
+    if(myrank == 0)write(*,*)'t_exp_sigma',sqrt(t_exp_sigma)*0.024189d0
+
+    Eexp = Eexp*f0_2
+    Eexp_org = Eexp
+
     cut_sigma = (sqrt(t_exp_sigma)*4d0)**10
     Eexp = Eexp * exp(-0.5d0*(tt_exp-texp_ave)**10/cut_sigma)
 
