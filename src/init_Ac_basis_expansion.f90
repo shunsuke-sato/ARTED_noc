@@ -176,7 +176,7 @@ subroutine init_Ac_basis_expansion
 ! pump laser
     do iter=0,Nt+2
       tt=iter*dt - t_offset
-      if (tt<tpulse_1) then
+      if (0d0 < tt .and. tt<tpulse_1) then
         Actot_BE(iter)=-f0_1/omega_1*(cos(pi*(tt-0.5d0*tpulse_1)/tpulse_1))**2&
             *sin(omega_1*(1d0+chirp_1*(tt-0.5d0*tpulse_1))*(tt-0.5d0*tpulse_1)+phi_CEP_1*2d0*pi)
       end if
