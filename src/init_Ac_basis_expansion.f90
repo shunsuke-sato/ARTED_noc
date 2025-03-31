@@ -186,7 +186,7 @@ subroutine init_Ac_basis_expansion
 ! probe laser
     do iter=0,Nt+2
       tt=iter*dt - t_offset
-      ss = tt -0.5d0*tpulse_1 + texp_ave
+      ss = tt -0.5d0*tpulse_1 + texp_ave + T1_T2
       if(ss > tt_exp(1) .and. ss < tt_exp(nt_exp))then
         do it = 1, nt_exp
           if(ss < tt_exp(it))then
