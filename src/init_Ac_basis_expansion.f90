@@ -32,6 +32,7 @@ subroutine init_Ac_basis_expansion
   real(8),parameter :: t_offset = 0d0/0.024189d0, tpump_center = 25d0/0.024189d0
   real(8) :: amat(3,3), bmat(3,3), yvec(3), xvec(3)
   real(8) :: x0, x1, x2, y0, y1, y2
+  real(8) :: t_delay_satellite, tpump_max, tpump_min, Ep_max, Ep_min
 
   if(myrank == 0)write(*,"(A)")"== Start: Initialization of vector potential."
 
@@ -222,6 +223,24 @@ subroutine init_Ac_basis_expansion
     do it = 1, nt_exp_pump-1
       Eexp_pump(it) = -(Aexp_pump(it+1)-Aexp_pump(it))/(tt_exp_pump(it+1)-tt_exp_pump(it))
     end do
+
+! Start: check the timing for satellite
+    Ep_max = 0d0
+    Ep_min = 0d0
+    do it = 1, nt_exp_pump-1
+      if(Eexp_pump(it) > Ep_max)then
+        Ep_max = Eexp_pump(it)
+        tpump_max = tt_exp_pump(it)
+      end if
+
+      if(Eexp_pump(it) < Ep_min)then
+        Ep_min = Eexp_pump(it)
+        tpump_min = tt_exp_pump(it)
+      end if
+    end do
+    t_delay_satellite = abs(tpump_max - tpump_min)*2
+! End: check the timing for satellite
+
     Eexp_pump_max = maxval(abs(Eexp_pump))
 !    write(*,*)"Eexp_pump_max",Eexp_pump_max
     Aexp_pump = Aexp_pump*f0_1/Eexp_pump_max
@@ -297,7 +316,8 @@ subroutine init_Ac_basis_expansion
 ! probe laser
     do iter=0,Nt+2
       tt=iter*dt - t_offset
- !     ss = tt -0.5d0*tpulse_1 + texp_ave - T1_T2]
+ !     ss = tt -0.5d0*tpulse_1 + texp_ave - T1_T2
+! main pulse
      ss = tt - tpump_center - T1_T2
       if(ss > tt_exp(1) .and. ss < tt_exp(nt_exp))then
         do it = 1, nt_exp
@@ -310,6 +330,26 @@ subroutine init_Ac_basis_expansion
         end do
         Actot_BE(iter)=Actot_BE(iter) + Ac_tmp
       end if
+
+! Start: satellite ==
+      if(if_probe_satellite)then
+
+        ss = tt - tpump_center - T1_T2 - t_delay_satellite
+        if(ss > tt_exp(1) .and. ss < tt_exp(nt_exp))then
+          do it = 1, nt_exp
+            if(ss < tt_exp(it))then
+              
+              Ac_tmp = Aexp(it-1)*(tt_exp(it)-ss)/(tt_exp(it)-tt_exp(it-1)) &
+                  + Aexp(it)*(ss-tt_exp(it-1))/(tt_exp(it)-tt_exp(it-1))
+              Ac_tmp = Ac_tmp*sqrt(satellite_int_ratio)
+              exit
+            end if
+          end do
+          Actot_BE(iter)=Actot_BE(iter) + Ac_tmp
+        end if
+      end if
+! End: satellite ==
+
     end do
   case default
     err_message='error in init_Ac'

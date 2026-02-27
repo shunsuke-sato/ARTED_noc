@@ -175,4 +175,8 @@ module global_variables
   logical,parameter :: switch_pump_induced_interband_transition = .false. !! .true.
   real(8),allocatable :: Mask_pump(:,:)
 
+! probe satellite
+  logical,parameter :: if_probe_satellite = .true. !! .true.
+  real(8),parameter :: satellite_int_ratio = 0.1d0
+  
 end Module Global_Variables
